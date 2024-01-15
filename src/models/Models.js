@@ -71,7 +71,7 @@ Reservation.belongsTo(Table, { foreignKey: 'TableID' });
 User.createItem = async (item) => {
   try {
     const salt = await bcrypt.genSalt(10);
-    item.password = await bcrypt.hash(item.password, salt);
+    item.PasswordHash = await bcrypt.hash(item.PasswordHash, salt);
     return await User.create(item);
   } catch (error) {
     throw error;

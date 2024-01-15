@@ -77,57 +77,114 @@ describe('User model', function() {
   
   describe('updateItem', function() {
     it('should update a user if the user exists', async function() {
+      const findByPkStub = stub(User, 'findByPk');
+      findByPkStub.returns(Promise.resolve({ id: 1, username: 'test', password: 'hashedPassword' }));
+      
       const updateStub = sinon.stub(User, 'update');
       updateStub.returns(Promise.resolve([1]));
 
       const result = await User.updateItem(1, { username: 'updated' });
 
-      assert.strictEqual(result, 'user updated');
+      assert.deepStrictEqual(result, [1]);
+      assert(findByPkStub.calledOnce);
       assert(updateStub.calledOnce);
     });
 
-    it('should return "user not found" if the user does not exist', async function() {
-      const updateStub = sinon.stub(User, 'update');
-      updateStub.returns(Promise.resolve([0]));
-
-      const result = await User.updateItem(1, { username: 'updated' });
-
-      assert.strictEqual(result, 'user not found');
-      assert(updateStub.calledOnce);
+    it('should throw an error with message "user not found" if the user does not exist', async function() {
+      const findByPkStub = sinon.stub(User, 'findByPk');
+      findByPkStub.returns(Promise.resolve(null));
+    
+      try {
+        await User.updateItem(1, { username: 'updated' });
+      } catch (error) {
+        assert.strictEqual(error.message, 'user not found');
+      }
+    
+      assert(findByPkStub.calledOnce);
     });
 
     it('should return "id must be a number" if the id is not a number', async function() {
-      const result = await User.updateItem('notANumber', { username: 'updated' });
+      const findByPkStub = stub(User, 'findByPk');
+      findByPkStub.returns(Promise.resolve({ id: 1, username: 'test', password: 'hashedPassword' }));
+      
 
-      assert.strictEqual(result, 'id must be a number');
+      try {
+        await User.updateItem('notANumber', { username: 'updated' });
+      } catch (error) {
+        assert.strictEqual(error.message, 'id must be a number');
+      }
+
     });
   });
 
   describe('deleteItem', function() {
     it('should delete a user if the user exists', async function() {
+      const findByPkStub = stub(User, 'findByPk');
+      findByPkStub.returns(Promise.resolve({ id: 1, username: 'test', password: 'hashedPassword' }));
+      
       const destroyStub = sinon.stub(User, 'destroy');
       destroyStub.returns(Promise.resolve(1));
 
       const result = await User.deleteItem(1);
 
-      assert.strictEqual(result, 'user deleted');
+      assert.strictEqual(result, (1));
       assert(destroyStub.calledOnce);
     });
 
     it('should return "user not found" if the user does not exist', async function() {
+      const findByPkStub = stub(User, 'findByPk');
+      findByPkStub.returns(Promise.resolve(null));
+
       const destroyStub = sinon.stub(User, 'destroy');
-      destroyStub.returns(Promise.resolve(0));
+      destroyStub.returns(Promise.resolve(null));
+      
+    try {
+        await User.deleteItem(1);
+      } catch (error) {
+        assert.strictEqual(error.message, 'user not found');
+      }
 
-      const result = await User.deleteItem(1);
-
-      assert.strictEqual(result, 'user not found');
-      assert(destroyStub.calledOnce);
     });
 
     it('should return "id must be a number" if the id is not a number', async function() {
-      const result = await User.deleteItem('notANumber');
+      const findByPkStub = stub(User, 'findByPk');
+      findByPkStub.returns(Promise.resolve({ id: 1, username: 'test', password: 'hashedPassword' }));
+      
+      try {
+        await User.deleteItem('notANumber');
+      } catch (error) {
+        assert.strictEqual(error.message, 'id must be a number');
+      }
 
-      assert.strictEqual(result, 'id must be a number');
+    });
+  });
+
+  describe('User operations', function() {
+    let createdUser;
+    let id;
+  
+    it('should create a User', async function() {
+      createdUser = await User.createItem({ Username: 'test', PasswordHash: 'hashedPassword' });
+      id = createdUser.dataValues.UserID;
+      assert.strictEqual(createdUser.Username, 'test');
+    });
+  
+    it('should retrieve a User', async function() {
+      const retrievedUser = await User.readItem(id);
+      assert.strictEqual(retrievedUser.Username, 'test');
+    });
+  
+    it('should update a User', async function() {
+      const updatedUser = await User.updateItem(id, { Username: 'updatedTest' });
+      assert.strictEqual(updatedUser[0], 1); // updateItem should return an array where the first element is the number of updated rows
+      const retrievedUser = await User.readItem(id);
+      assert.strictEqual(retrievedUser.Username, 'updatedTest');
+    });
+  
+    it('should delete a User', async function() {
+      const deletedCount = await User.deleteItem(id);
+      assert.strictEqual(deletedCount, 1);
     });
   });
 });
+
