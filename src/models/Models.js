@@ -1,5 +1,6 @@
 import { DataTypes } from 'sequelize';
 import { sequelize } from '../database.js';
+import bcrypt from 'bcrypt';
 
 const User = sequelize.define('User', {
   UserID: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -69,10 +70,16 @@ Reservation.belongsTo(Table, { foreignKey: 'TableID' });
 // User CRUD operations
 User.createItem = async (item) => {
   try {
+    const salt = await bcrypt.genSalt(10);
+    item.password = await bcrypt.hash(item.password, salt);
     return await User.create(item);
   } catch (error) {
     throw error;
   }
+};
+
+User.prototype.checkPassword = async function(password) {
+  return await bcrypt.compare(password, this.password);
 };
 
 User.readItem = async (id) => {
