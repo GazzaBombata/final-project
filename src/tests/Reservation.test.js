@@ -163,10 +163,6 @@ describe('Reservation testing', function() {
     });
 
     it('should delete a Reservation', async function() {
-      console.log(createdReservation);
-      console.log(table);
-      console.log(restaurant);
-      console.log(user);
       const deletedCount = await Reservation.deleteItem(id);
       await Table.deleteItem(table.TableID);
       await Restaurant.deleteItem(restaurant.RestaurantID); 

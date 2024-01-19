@@ -73,11 +73,9 @@ User.createItem = async (item) => {
 
   try {
     const response = await createUser(item);
-    console.log(response);
     item.UserfrontUserId = response.userId;
     delete item.Password;
     delete item.Name;
-    console.log(item);
     return await User.create(item);
   } catch (error) {
     throw error;
@@ -129,23 +127,22 @@ User.deleteItem = async (id) => {
     
     const response = await User.readItem(id);
 
+
     if (!response) {
       throw new Error("userFront ID not found");
     }
 
     const userfrontResponse = await deleteUser(response.dataValues.UserfrontUserId);
-    console.log(userfrontResponse)
+
 
     if (!userfrontResponse) {
       throw new Error("userFront not found");
     }
 
     const databaseResponse = await User.destroy({ where: { UserID: id } });
-
-    console.log(databaseResponse)
     
     if (!databaseResponse) {
-      throw new Error("user Databse not found");
+      throw new Error("user Database not found");
     }
     
     return databaseResponse;

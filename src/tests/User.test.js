@@ -14,27 +14,24 @@ describe('User model', function() {
   describe('createItem', function() {
     it('should create a user', async () => {
       const item = {
-        username: 'testuser',
-        password: 'testpassword',
+        UserId: 1,
+        email: 'test@test.it',
       };
   
       const userfrontResponse = {
-        data: {
-          userId: '123',
-        },
+        userId: 6
       };
   
       const dbResponse = {
         ...item,
-        UserfrontUserId: userfrontResponse.data.userId,
+        UserfrontUserId: userfrontResponse.userId,
       };
   
       const createUserStub = sinon.stub(createUserModule, 'createUser').resolves(userfrontResponse);
       const dbCreateStub = sinon.stub(User, 'create').resolves(dbResponse);
   
       const result = await User.createItem(item);
-  
-      strictEqual(result.DataValues.UserId, 1);
+      strictEqual(result.UserId, 1);
 
       createUserStub.restore();
       dbCreateStub.restore();
@@ -44,11 +41,11 @@ describe('User model', function() {
   describe('readItem', function() {
     it('should return a user if the user exists', async function() {
       const findByPkStub = stub(User, 'findByPk');
-      findByPkStub.returns(Promise.resolve({ id: 1, username: 'test', password: 'hashedPassword' }));
+      findByPkStub.returns(Promise.resolve({ UserId: 1, username: 'test', password: 'hashedPassword' }));
 
       const user = await User.readItem(1);
 
-      strictEqual(user.DataValues.UserId, 1);
+      strictEqual(user.UserId, 1);
       assert(findByPkStub.calledOnce);
     });
 
@@ -120,18 +117,19 @@ describe('User model', function() {
   describe('deleteItem', function() {
     it('should delete a user if the user exists', async function() {
       const findByPkStub = stub(User, 'findByPk');
-      findByPkStub.returns(Promise.resolve({ UserID: 1, UserfrontUserId: 1, ContactNumber: '1234567890', Email: 'lel@lel.it' }));
+      findByPkStub.returns(Promise.resolve({ dataValues: { UserID: 1, UserfrontUserId: 1, ContactNumber: '1234567890', Email: 'lel@lel.it' }}));
       
       const destroyStub = sinon.stub(User, 'destroy');
       destroyStub.returns(Promise.resolve(1));
 
       const deleteUserStub = stub(deleteUserModule, 'deleteUser');
-      deleteUserStub.returns(Promise.resolve({ status: 200 }));
+      deleteUserStub.returns(Promise.resolve({ message: 'deleted' }));
 
       const result = await User.deleteItem(1);
 
       assert.strictEqual(result, (1));
       assert(destroyStub.calledOnce);
+      
     });
 
     it('should return "user not found" if the user does not exist', async function() {
@@ -170,8 +168,7 @@ describe('User model', function() {
       createdUser = await User.createItem({ Name: 'test', Password: 'hashedPassword1', ContactNumber: '1234567890', Email: 'test@test.it' });
       id = createdUser.dataValues.UserID;
       const retrievedUser = await User.readItem(id);
-      console.log (retrievedUser)
-      assert.strictEqual(createdUser.ContactNumber, '1234567890');
+      assert.strictEqual(createdUser.dataValues.ContactNumber, '1234567890');
     });
   
     it('should retrieve a User', async function() {
@@ -183,7 +180,7 @@ describe('User model', function() {
       const updatedUser = await User.updateItem(id, { ContactNumber: '0987654321' });
       assert.strictEqual(updatedUser[0], 1); 
       const retrievedUser = await User.readItem(id);
-      assert.strictEqual(retrievedUser.DataValues.ContactNumber, '0987654321');
+      assert.strictEqual(retrievedUser.dataValues.ContactNumber, '0987654321');
     });
   
     it('should delete a User', async function() {

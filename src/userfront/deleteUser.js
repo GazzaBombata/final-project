@@ -8,9 +8,5 @@ export async function deleteUser(userId) {
 });
 
 const responseData = await response.json();
-console.log('deleteUser');
-console.log(userId)
-console.log(responseData);
-
 return responseData;
 }
