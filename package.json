@@ -6,19 +6,31 @@
   "scripts": {
     "test": "NODE_ENV=test mocha --require @babel/register --recursive src/tests",
     "dev": "nodemon --exec babel-node src/index.js",
-    "start": "node dist/app.js",
-    "build": "babel src --out-dir dist"
+    "start": "node dist/index.js",
+    "build": "babel src --out-dir dist",
+    "build:frontend": "cd client && vite build",
+    "dev:frontend": "cd client && vite",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@reduxjs/toolkit": "^2.0.1",
     "axios": "^1.6.5",
     "bcrypt": "^5.1.1",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "mysql2": "^3.6.5",
-    "sequelize": "^6.35.2"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-helmet": "^6.1.0",
+    "react-query": "^3.39.3",
+    "react-redux": "^9.0.4",
+    "react-router-dom": "^6.21.1",
+    "redux": "^5.0.1",
+    "sequelize": "^6.35.2",
+    "styled-components": "^6.1.6"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.4",
@@ -30,6 +42,14 @@
     "chai-http": "^4.4.0",
     "mocha": "^10.2.0",
     "nodemon": "^3.0.2",
-    "sinon": "^17.0.1"
+    "sinon": "^17.0.1",
+    "vite": "^5.0.12",
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5"
   }
 }
