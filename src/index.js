@@ -255,6 +255,43 @@ app.get('/restaurants/:id/tables', async (req, res) => {
   }
 });
 
+app.post('/v1/webhook', async (req, res) => {
+  try {
+    const authorization = req.headers.authorization;
+    const { mode, action, model, record } = req.body;
+
+    // Validate the authorization header
+    if (authorization !== "uf_test_webhook_wn9vz89b_...") {
+      return res.status(401).json({ message: 'Unauthorized' }); // Unauthorized
+    }
+
+    // Handle the webhook based on the action
+    if (model === 'user') {
+
+      // const sequelize = mode === 'test' ? sequelizeTest : sequelizeProd;
+
+      switch (action) {
+        case 'create':
+          // Handle the new user record
+          // This might involve adding the user to your database
+          const newUser = await User.created(record);
+          return res.json(newUser);
+        case 'delete':
+          // Handle the deleted user record
+          // This might involve removing the user from your database
+          const deletedUser = await User.deleted(record.userId);
+          return res.json(deletedUser);
+        default:
+          return res.status(400).json({ message: 'Invalid action' }); // Bad Request
+      }
+    } else {
+      return res.status(400).json({ message: 'Invalid model' }); // Bad Request
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
+  }
+});
+
 app.listen(process.env.PORT || 8080);
 
 

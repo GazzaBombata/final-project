@@ -380,6 +380,23 @@ Restaurant.prototype.getTables = async function(startDate, endDate) {
   }
 };
 
+User.created = async function(record) {
+  try {
+    item.UserfrontUserId = record.userId;
+    return await User.create(item);
+  } catch (error) {
+    throw error;
+  }
+}
+
+User.deleted = async function(record) {
+  try {
+    return await User.destroy({ where: { UserfrontUserId: record.userId } });
+  } catch (error) {
+    throw error;
+  }
+}
+
 
 
 export { User, Restaurant, Table, Reservation };
