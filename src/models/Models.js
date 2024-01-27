@@ -76,8 +76,11 @@ User.createItem = async (item) => {
     item.UserfrontUserId = response.userId;
     delete item.Password;
     delete item.Name;
+    console.log('starting sequelize')
+    console.log(item)
     return await User.create(item);
   } catch (error) {
+    conxole.log(error)
     throw error;
   }
 };
@@ -382,9 +385,12 @@ Restaurant.prototype.getTables = async function(startDate, endDate) {
 
 User.created = async function(record) {
   try {
-    item.UserfrontUserId = record.userId;
+    console.log('user.creeated function now')
+    let item = { UserfrontUserId: record.userId }
+    console.log(item)
     return await User.create(item);
-  } catch (error) {
+  } catch (error) { 
+    console.log(error)
     throw error;
   }
 }

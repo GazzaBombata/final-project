@@ -1,8 +1,9 @@
 export default {
   build: {
-    outDir: 'public',
+    outDir: 'client/dist',
+    publicDir: 'public',
     rollupOptions: {
-      input: './client/app.jsx', 
+      input: 'client/app.jsx', 
     },
   }
 }
