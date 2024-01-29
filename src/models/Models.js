@@ -3,6 +3,7 @@ import { sequelize } from '../database.js';
 import { createUser } from '../userfront/createUser.js';
 import { getUser } from '../userfront/getUser.js';
 import { deleteUser } from '../userfront/deleteUser.js';
+import { makeUserAdmin } from '../userfront/makeUserAdmin.js'; 
 
 const User = sequelize.define('User', {
   UserID: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -104,19 +105,45 @@ User.readItem = async (id) => {
   }
 };
 
+User.userFrontReadItem = async (userFrontUserId) => {
+  try {
+    if (isNaN(userFrontUserId)) {
+      return "id must be a number";
+    }
+    
+    const user = await User.findOne({
+      where: {
+        UserfrontUserId: userFrontUserId
+      }
+    });
+
+    if (!user) {
+      throw new Error("user not found");
+    }
+    
+    return (user.get({ plain: true }));
+  } catch (error) {
+    throw error;
+  }
+};
+
 User.updateItem = async (id, item) => {
   try {
     if (isNaN(id)) {
       throw new Error("id must be a number");
     }
     
-    const user = await User.findByPk(id);
+    const user = await User.findOne({
+      where: {
+        UserfrontUserId: id
+      }
+    });
     
     if (!user) {
       throw new Error("user not found");
     }
     
-    return await User.update(item, { where: { UserID: id } });
+    return await User.update(item, { where: { UserID: user.dataValues.UserID } });
   } catch (error) {
     throw error;
   }
@@ -128,21 +155,25 @@ User.deleteItem = async (id) => {
       throw new Error("id must be a number");
     }
     
-    const response = await User.readItem(id);
+    const user = await User.findOne({
+      where: {
+        UserfrontUserId: id
+      }
+    });
 
 
-    if (!response) {
+    if (!user) {
       throw new Error("userFront ID not found");
     }
 
-    const userfrontResponse = await deleteUser(response.dataValues.UserfrontUserId);
+    const userfrontResponse = await deleteUser(user.dataValues.UserfrontUserId);
 
 
     if (!userfrontResponse) {
       throw new Error("userFront not found");
     }
 
-    const databaseResponse = await User.destroy({ where: { UserID: id } });
+    const databaseResponse = await User.destroy({ where: { UserID: user.dataValues.UserID } });
     
     if (!databaseResponse) {
       throw new Error("user Database not found");
@@ -154,9 +185,18 @@ User.deleteItem = async (id) => {
   }
 };
 
+User.makeAdmin = async (userFrontUserId) => {
+  if (isNaN(userId)) {
+    throw new Error("id must be a number");
+  }
+  
+  return await makeUserAdmin(userFrontUserId);
+}
+
 // Restaurant CRUD operations
-Restaurant.createItem = async (item) => {
+Restaurant.createItem = async (user, item) => {
   try {
+    item.OwnerUserID = user.userId;
     return await Restaurant.create(item);
   } catch (error) {
     throw error;
@@ -385,7 +425,7 @@ Restaurant.prototype.getTables = async function(startDate, endDate) {
 
 User.created = async function(record) {
   try {
-    console.log('user.creeated function now')
+    console.log('user.created function now')
     let item = { UserfrontUserId: record.userId }
     console.log(item)
     return await User.create(item);

@@ -1,6 +1,7 @@
 import express from 'express';
 import { User, Restaurant, Table, Reservation } from './models/Models';
 import path from 'path';
+import jose from 'jose'; 
 
 const app = express();
 
@@ -15,6 +16,27 @@ app.use((error, req, res, next) => {
   next();
 });
 
+const verifyJwt = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader) {
+    const token = authHeader.split(' ')[1];
+
+    try {
+      const { payload } = await jose.jwtVerify(token, publicKey, {
+        algorithms: ["RS256"]
+      });
+
+      req.user = payload;
+      next();
+    } catch (err) {
+      res.status(403).json({ message: 'Invalid or expired token' });
+    }
+  } else {
+    res.status(401).json({ message: 'No token provided' });
+  }
+};
+
 // Catch-all route handler
 app.get('*', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../client/dist', 'index.html'));
@@ -25,39 +47,13 @@ app.get('/', (req, res) => {
 });
 
 
+
 // User endpoints
 
-app.post('/v1/login', async (req, res) => {
+app.get('/v1/users/:id', verifyJwt, async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) {
-      res.status(404).json({ message: 'User not found' }); // Not Found
-      return;
-    }
-    const isPasswordValid = await user.checkPassword(password);
-    if (!isPasswordValid) {
-      res.status(401).json({ message: 'Invalid password' }); // Unauthorized
-      return;
-    }
-    res.json({ message: 'Login successful' });
-  } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
-  }
-});
-
-app.post('/v1/users', async (req, res) => {
-  try {
-    const user = await User.createItem(req.body);
-    res.status(201).json(user); // Created
-  } catch (error) {
-    res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
-  }
-});
-
-app.get('/v1/users/:id', async (req, res) => {
-  try {
-    const user = await User.readItem(req.params.id);
+    
+  const user = await User.userFrontReadItem(req.user.userId);
     if (user) {
       res.json(user);
     } else {
@@ -68,9 +64,9 @@ app.get('/v1/users/:id', async (req, res) => {
   }
 });
 
-app.put('/v1/users/:id', async (req, res) => {
+app.put('/v1/users/:id',  verifyJwt,  async (req, res) => {
   try {
-    const user = await User.updateItem(req.params.id, req.body);
+    const user = await User.updateItem(req.user.userId, req.body);
     if (user) {
       res.json(user);
     } else {
@@ -81,9 +77,23 @@ app.put('/v1/users/:id', async (req, res) => {
   }
 });
 
-app.delete('/v1/users/:id', async (req, res) => {
+app.put('/v1/users/roles/:id', verifyJwt, async (req, res) => {
+
   try {
-    const user = await User.deleteItem(req.params.id);
+    const user = await User.makeAdmin(req.user.userId);
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ message: 'User not found' }); // Not Found
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
+  }
+});
+
+app.delete('/v1/users/:id', verifyJwt, async (req, res) => {
+  try {
+    const user = await User.deleteItem(req.user.userId);
     if (user) {
       res.json(user);
     } else {
@@ -95,16 +105,16 @@ app.delete('/v1/users/:id', async (req, res) => {
 });
 
 // Restaurant endpoints
-app.post('/v1/restaurants', async (req, res) => {
+app.post('/v1/restaurants', verifyJwt, async (req, res) => {
   try {
-    const restaurant = await Restaurant.createItem(req.body);
+    const restaurant = await Restaurant.createItem(req.user, req.body);
     res.status(201).json(restaurant); // Created
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
   }
 });
 
-app.get('/v1/restaurants/:id', async (req, res) => {
+app.get('/v1/restaurants/:id', verifyJwt, async (req, res) => {
   try {
     const restaurant = await Restaurant.readItem(req.params.id);
     if (restaurant) {
@@ -117,7 +127,7 @@ app.get('/v1/restaurants/:id', async (req, res) => {
   }
 });
 
-app.put('/v1/restaurants/:id', async (req, res) => {
+app.put('/v1/restaurants/:id', verifyJwt, async (req, res) => {
   try {
     const restaurant = await Restaurant.updateItem(req.params.id, req.body);
     if (restaurant) {
@@ -130,7 +140,7 @@ app.put('/v1/restaurants/:id', async (req, res) => {
   }
 });
 
-app.delete('/v1/restaurants/:id', async (req, res) => {
+app.delete('/v1/restaurants/:id', verifyJwt, async (req, res) => {
   try {
     const restaurant = await Restaurant.deleteItem(req.params.id);
     if (restaurant) {
@@ -143,7 +153,7 @@ app.delete('/v1/restaurants/:id', async (req, res) => {
   }
 });
 // Table endpoints
-app.post('/v1/tables', async (req, res) => {
+app.post('/v1/tables', verifyJwt, async (req, res) => {
   try {
     const table = await Table.createItem(req.body);
     res.status(201).json(table); // Created
@@ -152,7 +162,7 @@ app.post('/v1/tables', async (req, res) => {
   }
 });
 
-app.get('/v1/tables/:id', async (req, res) => {
+app.get('/v1/tables/:id', verifyJwt, async (req, res) => {
   try {
     const table = await Table.readItem(req.params.id);
     if (table) {
@@ -165,7 +175,7 @@ app.get('/v1/tables/:id', async (req, res) => {
   }
 });
 
-app.put('/v1/tables/:id', async (req, res) => {
+app.put('/v1/tables/:id', verifyJwt, async (req, res) => {
   try {
     const table = await Table.updateItem(req.params.id, req.body);
     if (table) {
@@ -178,7 +188,7 @@ app.put('/v1/tables/:id', async (req, res) => {
   }
 });
 
-app.delete('/v1/tables/:id', async (req, res) => {
+app.delete('/v1/tables/:id', verifyJwt, async (req, res) => {
   try {
     const table = await Table.deleteItem(req.params.id);
     if (table) {
@@ -192,7 +202,7 @@ app.delete('/v1/tables/:id', async (req, res) => {
 });
 
 // Reservation endpoints
-app.post('/v1/reservations', async (req, res) => {
+app.post('/v1/reservations', verifyJwt, async (req, res) => {
   try {
     const reservation = await Reservation.createItem(req.body);
     res.status(201).json(reservation); // Created
@@ -201,7 +211,7 @@ app.post('/v1/reservations', async (req, res) => {
   }
 });
 
-app.get('/v1/reservations/:id', async (req, res) => {
+app.get('/v1/reservations/:id', verifyJwt, async (req, res) => {
   try {
     const reservation = await Reservation.readItem(req.params.id);
     if (reservation) {
@@ -214,7 +224,7 @@ app.get('/v1/reservations/:id', async (req, res) => {
   }
 });
 
-app.put('/v1/reservations/:id', async (req, res) => {
+app.put('/v1/reservations/:id', verifyJwt, async (req, res) => {
   try {
     const reservation = await Reservation.updateItem(req.params.id, req.body);
     if (reservation) {
@@ -227,7 +237,7 @@ app.put('/v1/reservations/:id', async (req, res) => {
   }
 });
 
-app.delete('/v1/reservations/:id', async (req, res) => {
+app.delete('/v1/reservations/:id', verifyJwt, async (req, res) => {
   try {
     const reservation = await Reservation.deleteItem(req.params.id);
     if (reservation) {
@@ -241,7 +251,7 @@ app.delete('/v1/reservations/:id', async (req, res) => {
 });
 
 // Restaurant Reservations endpoints
-app.get('/v1/restaurants/:id/reservations', async (req, res) => {
+app.get('/v1/restaurants/:id/reservations', verifyJwt, async (req, res) => {
   try {
     const restaurant = await Restaurant.readItem(req.params.id);
     const reservations = await restaurant.getReservations();
@@ -251,7 +261,7 @@ app.get('/v1/restaurants/:id/reservations', async (req, res) => {
   }
 });
 
-app.get('/v1/restaurants/:id/tables', async (req, res) => {
+app.get('/v1/restaurants/:id/tables', verifyJwt, async (req, res) => {
   try {
     const restaurant = await Restaurant.readItem(req.params.id);
     const tables = await restaurant.getTables();
@@ -267,9 +277,17 @@ app.post('/v1/webhook', async (req, res) => {
   try {
     const authorization = req.headers.authorization;
     const { mode, action, model, record } = req.body;
-
+    console.log(authorization)
+    console.log(mode)
+    console.log(action)
+    console.log(model)
+    console.log(record)
     // Validate the authorization header
-    if (authorization !== "uf_test_webhook_wn9vz89b_941ffd20ff41448efbafadd81101c8df") {
+    const expectedToken = `${process.env.USERFRONT_WEBHOOK_API_KEY}`;
+    const bearerToken = `Bearer ${expectedToken}`;
+
+    if (authorization !== bearerToken) {
+      console.log('unauthorized')
       return res.status(401).json({ message: 'Unauthorized' }); // Unauthorized
     }
 
@@ -282,7 +300,7 @@ app.post('/v1/webhook', async (req, res) => {
         case 'create':
           // Handle the new user record
           // This might involve adding the user to your database
-          console.log('weebhook received, startign to create user')
+          console.log('webhook received, startign to create user')
           console.log(record)
           const newUser = await User.created(record);
           return res.json(newUser);
@@ -295,6 +313,7 @@ app.post('/v1/webhook', async (req, res) => {
           return res.status(400).json({ message: 'Invalid action' }); // Bad Request
       }
     } else {
+      console.log('invalid model')
       return res.status(400).json({ message: 'Invalid model' }); // Bad Request
     }
   } catch (error) {
