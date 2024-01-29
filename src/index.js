@@ -1,13 +1,24 @@
 import express from 'express';
 import { User, Restaurant, Table, Reservation } from './models/Models';
 import path from 'path';
-import jose from 'jose'; 
+import * as jose from 'jose';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { createPublicKey } from 'crypto';
+
+dotenv.config();
 
 const app = express();
 
 app.use(express.json());
 
-app.use(express.static('client/dist'));
+// Enable all CORS requests
+app.use(cors());
+
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 
 app.use((error, req, res, next) => {
   if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
@@ -17,7 +28,15 @@ app.use((error, req, res, next) => {
 });
 
 const verifyJwt = async (req, res, next) => {
+  console.log('verifying jwt')
   const authHeader = req.headers.authorization;
+  const publicKeyPem = process.env.JWT_PUBLIC_KEY;
+
+  const publicKey = createPublicKey({
+    key: publicKeyPem,
+    format: 'pem',
+  });
+
 
   if (authHeader) {
     const token = authHeader.split(' ')[1];
@@ -30,17 +49,13 @@ const verifyJwt = async (req, res, next) => {
       req.user = payload;
       next();
     } catch (err) {
+      console.log(err)
       res.status(403).json({ message: 'Invalid or expired token' });
     }
   } else {
     res.status(401).json({ message: 'No token provided' });
   }
 };
-
-// Catch-all route handler
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '../client/dist', 'index.html'));
-});
 
 app.get('/', (req, res) => {
   res.send('Hello, World by final-project!');
@@ -87,6 +102,23 @@ app.put('/v1/users/roles/:id', verifyJwt, async (req, res) => {
       res.status(404).json({ message: 'User not found' }); // Not Found
     }
   } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
+  }
+});
+
+app.get('/v1/check-role', verifyJwt, async (req, res) => {
+console.log('checking roles')
+  try {
+    console.log(req.user)
+    console.log(req.user.authorization.wn9vz89b.roles[0])
+    const role = req.user.authorization.wn9vz89b.roles[0];
+    if (role === 'owner') {
+      res.json({ isOwner: true });
+    } else {
+      res.json({ isOwner: false });
+    }
+  } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
   }
 });
@@ -155,7 +187,7 @@ app.delete('/v1/restaurants/:id', verifyJwt, async (req, res) => {
 // Table endpoints
 app.post('/v1/tables', verifyJwt, async (req, res) => {
   try {
-    const table = await Table.createItem(req.body);
+    const table = await Table.createItem(req.user, req.body);
     res.status(201).json(table); // Created
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
@@ -204,7 +236,7 @@ app.delete('/v1/tables/:id', verifyJwt, async (req, res) => {
 // Reservation endpoints
 app.post('/v1/reservations', verifyJwt, async (req, res) => {
   try {
-    const reservation = await Reservation.createItem(req.body);
+    const reservation = await Reservation.createItem(req.user, req.body);
     res.status(201).json(reservation); // Created
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
@@ -322,6 +354,17 @@ app.post('/v1/webhook', async (req, res) => {
   }
 });
 
-app.listen(process.env.PORT || 8080);
+app.use(express.static('client/dist'));
+
+// Catch-all route handler
+app.get('*', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../client/dist', 'index.html'));
+});
+
+const port = process.env.PORT || 8080;
+
+app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
 
 

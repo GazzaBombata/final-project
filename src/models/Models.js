@@ -194,9 +194,16 @@ User.makeAdmin = async (userFrontUserId) => {
 }
 
 // Restaurant CRUD operations
-Restaurant.createItem = async (user, item) => {
+Restaurant.createItem = async (owner, item) => {
   try {
-    item.OwnerUserID = user.userId;
+
+    const user = await User.findOne({
+      where: {
+        UserfrontUserId: owner.userId
+      }
+    });
+
+    item.OwnerUserID = user.dataValues.userID;
     return await Restaurant.create(item);
   } catch (error) {
     throw error;
@@ -259,8 +266,23 @@ Restaurant.deleteItem = async (id) => {
 
 
 // Table CRUD operations
-Table.createItem = async (item) => {
+Table.createItem = async (owner, item) => {
   try {
+
+    const user = await User.findOne({
+      where: {
+        UserfrontUserId: owner.userId
+      }
+    });
+
+    const restaurant = await Restaurant.findOne({
+      where: {
+        OwnerUserID: user.dataValues.UserID
+      }
+    });
+
+    item.RestaurantID = restaurant.dataValues.RestaurantID;
+
     return await Table.create(item);
   } catch (error) {
     throw error;
@@ -322,8 +344,25 @@ Table.deleteItem = async (id) => {
 };
 
 // Reservation CRUD operations
-Reservation.createItem = async (item) => {
+Reservation.createItem = async (guest, item) => {
   try {
+
+    const user = await User.findOne({
+      where: {
+        UserfrontUserId: guest.userId
+      }
+    });
+
+    item.UserID = user.dataValues.UserID;
+
+    const table = await Table.findOne({
+      where: {
+        TableID: item.TableID
+      }
+    });
+
+    item.RestaurantID = table.dataValues.RestaurantID;
+
     return await Reservation.create(item);
   } catch (error) {
     throw error;
@@ -425,9 +464,7 @@ Restaurant.prototype.getTables = async function(startDate, endDate) {
 
 User.created = async function(record) {
   try {
-    console.log('user.created function now')
     let item = { UserfrontUserId: record.userId }
-    console.log(item)
     return await User.create(item);
   } catch (error) { 
     console.log(error)
