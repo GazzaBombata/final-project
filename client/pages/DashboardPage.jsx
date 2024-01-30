@@ -1,42 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
-import Userfront from "@userfront/core";
 import { Navigate } from 'react-router-dom';
-import { BrowserRouter as Router, Routes, Link } from "react-router-dom";
-// import SetRestaurant from './SetRestaurant';
-// import SetTables from './SetTables';
-// import SetReservations from './SetReservations';
+import { BrowserRouter as Router, Routes, Link, Route } from "react-router-dom";
+import { fetchRole } from '../functions-hooks/fetchRole.js'
+import RestaurantTab from './RestaurantTab';
+import TablesTab from './TablesTab';
+import ReservationsTab from './ReservationsTab';
 
-Userfront.init("wn9vz89b");
-
-const fetchRole = async () => {
-
-  console.log(Userfront.tokens.accessToken)
-
-  let res;
-
-  try {
-  res = await fetch('http://localhost:8080/v1/check-role', {
-    headers: {
-      Authorization: `Bearer ${Userfront.tokens.accessToken}`,
-    },
-  });
-  console.log(res);
-
-  if (!res.ok) {
-    console.log('not ok');
-    throw new Error('Network response was not ok');
-  }
-  } catch (error) {
-    console.log(error);
-  }
-
-  const data = await res.json();
-  console.log('ok');
-  console.log(data);
-
-  return data;
-};
 
 function DashboardPage() {
   const { data, status } = useQuery('role', fetchRole);
@@ -67,9 +37,9 @@ const isLoading = status === 'loading';
       </div>
       <div className="content">
         <Routes>
-          {/* <Route path="/dashboard/restaurant" component={SetRestaurant} />
-          <Route path="/dashboard/tables" component={SetTables} />
-          <Route path="/dashboard/reservations" component={SetReservations} /> */}
+          <Route path="/dashboard/restaurant" component={RestaurantTab} />
+          <Route path="/dashboard/tables" component={TablesTab} />
+          <Route path="/dashboard/reservations" component={ReservationsTab} />
         </Routes>
       </div>
     </div>
