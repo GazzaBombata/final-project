@@ -1,0 +1,16 @@
+runtime: nodejs20
+entrypoint: node dist/index.js
+
+env_variables:
+  NODE_ENV: 'production'
+  DB_NAME: 'PROD_DB'
+  DB_USER: 'root'
+  DB_PASSWORD: 'Maiale1234!'
+  DB_HOST: '34.65.113.108' 
+  DB_DIALECT: 'mysql'
+  CLOUD_SQL_CONNECTION_NAME: 'integral-hold-411309:europe-west6:final-project' 
+
+beta_settings:
+    cloud_sql_instances: integral-hold-411309:europe-west6:final-project
+
+service_account: integral-hold-411309@appspot.gserviceaccount.com
