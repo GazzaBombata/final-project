@@ -23,6 +23,7 @@ export const createRestaurant = async (restaurant) => {
     }
 
     const data = await res.json();
+    console.log(data);
 
     return data;
 

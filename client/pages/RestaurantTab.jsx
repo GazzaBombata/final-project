@@ -36,7 +36,17 @@ const { data: restaurantData, isLoading, isError } = useQuery('restaurantData', 
   
 useEffect(() => {
   if (restaurantData) {
-    setFormState(restaurantData);
+    setFormState({
+      Name: restaurantData.Name,
+    Address: restaurantData.Address,
+    PhoneNumber: restaurantData.PhoneNumber,
+    Email: restaurantData.Email,
+    CoverPhoto: restaurantData.CoverPhoto,
+    ProfilePhoto: restaurantData.ProfilePhoto,
+    OpeningTime: restaurantData.OpeningTime,
+    ClosingTime: restaurantData.ClosingTime,
+    }
+    );
   }
 }, [restaurantData]);
 

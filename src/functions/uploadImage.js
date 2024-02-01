@@ -9,7 +9,7 @@ export async function uploadImage(file) {
   const fileName = `${uniquePrefix}-${file.originalname}`;
 
   // Uploads a local file to the bucket
-  await storage.bucket(bucketName).upload(file.path, {
+  const [uploadedFile] = await storage.bucket(bucketName).upload(file.path, {
     destination: fileName,
     // Support for HTTP requests made with `Accept-Encoding: gzip`
     gzip: true,
@@ -19,6 +19,9 @@ export async function uploadImage(file) {
       cacheControl: 'public, max-age=31536000',
     },
   });
+
+  // Make the uploaded file public
+  await uploadedFile.makePublic();
 
 
   // Get the signed URL of the uploaded file

@@ -195,6 +195,8 @@ User.makeAdmin = async (userFrontUserId) => {
 
 // Restaurant CRUD operations
 Restaurant.createItem = async (owner, item) => {
+  console.log('starting createItem')
+  console.log(owner)
   try {
 
     const user = await User.findOne({
@@ -203,32 +205,17 @@ Restaurant.createItem = async (owner, item) => {
       }
     });
 
-    item.OwnerUserID = user.dataValues.userID;
-
-    // if (!item.profilePhoto) {
-    //   try {
-    //     const file = item.profilePhoto;
-    //     const imageUrl = await uploadImage(file);
-    //     item.CoverPhoto = imageUrl;
-    //   } catch (error) {
-    //     console.log(error);
-    //     throw error;
-    //   }
-    // }
-
-    // if (!item.coverPhoto) {
-    //   try {
-    //     const file = item.coverPhoto;
-    //     const imageUrl = await uploadImage(file);
-    //     item.CoverPhoto = imageUrl;
-    //   } catch (error) {
-    //     console.log(error);
-    //     throw error;
-    //   }
-    // }
+    if (!user) {
+      console.log('user not found')
+      return res.status(404).json({ message: 'User not found' });
+    }
+    console.log(user)
+    item.OwnerUserID = user.dataValues.UserID;
+    console.log(item)
     
     return await Restaurant.create(item);
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };

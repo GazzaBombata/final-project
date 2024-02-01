@@ -32,10 +32,10 @@ app.use((error, req, res, next) => {
 });
 
 const verifyJwt = async (req, res, next) => {
-  console.log('verifying jwt')
+
   const authHeader = req.headers.authorization;
   const publicKeyPem = process.env.JWT_PUBLIC_KEY;
-  console.log(authHeader)
+
 
   const publicKey = createPublicKey({
     key: publicKeyPem,
@@ -61,7 +61,6 @@ const verifyJwt = async (req, res, next) => {
       } else {
         console.log('The token is not expired');
       }
-      console.log('verified')
 
       next();
     } catch (err) {
@@ -156,7 +155,6 @@ app.delete('/v1/users/:id', verifyJwt, async (req, res) => {
 });
 
 app.get('/v1/user/restaurant', verifyJwt, async (req, res) => {
-  console.log('getting restaurant')
   try {
     console.log(req.user.userId)
     const user = await User.findOne({ where: { UserfrontUserId: req.user.userId } });
@@ -195,7 +193,6 @@ app.post('/v1/upload', verifyJwt, upload.single('image'), async (req, res) => {
 app.post('/v1/restaurants', verifyJwt, async (req, res) => {
   console.log('creating restaurant')
   try {
-    console.log(req.body)
     const restaurant = await Restaurant.createItem(req.user, req.body);
     res.status(201).json(restaurant); // Created
   } catch (error) {
