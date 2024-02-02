@@ -2,21 +2,17 @@ import Userfront from "@userfront/core";
 
 Userfront.init("wn9vz89b");
 
-export const updateRestaurant = async (restaurantID, restaurant) => {
-
+export const fetchReservations = async (restaurantID) => {
   let res;
 
   try {
-    restaurant.RestaurantID = restaurantID,
-    
-    res = await fetch(`http://localhost:8080/v1/restaurants/${restaurantID}`, {
+  
+    res = await fetch(`http://localhost:8080/v1/restaurants/${restaurantID}/reservations`, {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
-        'Content-Type': 'application/json',
       },
-      method: 'PUT',
-      body: JSON.stringify(restaurant),
     });
+
 
     if (!res.ok) {
       const errorData = await res.json();

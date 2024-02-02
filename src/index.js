@@ -58,14 +58,14 @@ const verifyJwt = async (req, res, next) => {
 
       if (currentUnixTimestamp > jwtExpiration) {
         console.log('The token is expired');
-      } else {
-        console.log('The token is not expired');
+        console.log(err)
+        res.status(403).json({ message: 'Expired token' });
       }
 
       next();
     } catch (err) {
       console.log(err)
-      res.status(403).json({ message: 'Invalid or expired token' });
+      res.status(403).json({ message: 'Invalid token' });
     }
   } else {
     res.status(401).json({ message: 'No token provided' });
@@ -125,10 +125,7 @@ app.put('/v1/users/roles/:id', verifyJwt, async (req, res) => {
 });
 
 app.get('/v1/check-role', verifyJwt, async (req, res) => {
-console.log('checking roles')
   try {
-    console.log(req.user)
-    console.log(req.user.authorization.wn9vz89b.roles[0])
     const role = req.user.authorization.wn9vz89b.roles[0];
     if (role === 'owner') {
       res.json({ isOwner: true });
@@ -156,22 +153,20 @@ app.delete('/v1/users/:id', verifyJwt, async (req, res) => {
 
 app.get('/v1/user/restaurant', verifyJwt, async (req, res) => {
   try {
-    console.log(req.user.userId)
     const user = await User.findOne({ where: { UserfrontUserId: req.user.userId } });
     if (!user) {
-      console.log(user)
       return res.status(404).json({ message: 'User not found' });
     }
  
 
     const restaurant = await Restaurant.findOne({ where: { OwnerUserID: user.UserID } });
     if (!restaurant) {
-      console.log("restaurant not found")
       return res.json(null);
     }
 
     res.json(restaurant);
   } catch (error) {
+    console.log('logging error')
     console.log(error)
     res.status(500).json({ message: 'Internal Server Error' });
   }
@@ -242,9 +237,11 @@ app.delete('/v1/restaurants/:id', verifyJwt, async (req, res) => {
 // Table endpoints
 app.post('/v1/tables', verifyJwt, async (req, res) => {
   try {
+    req.body.Quantity = 1;
     const table = await Table.createItem(req.user, req.body);
     res.status(201).json(table); // Created
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
   }
 });
@@ -355,8 +352,10 @@ app.get('/v1/restaurants/:id/tables', verifyJwt, async (req, res) => {
     const tables = await restaurant.getTables();
     res.json(tables);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
   }
+
 });
 
 app.post('/v1/webhook', async (req, res) => {

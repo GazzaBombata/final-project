@@ -45,6 +45,7 @@ const Reservation = sequelize.define('Reservation', {
   UserID: { type: DataTypes.INTEGER, references: { model: 'User', key: 'UserID' } },
   RestaurantID: { type: DataTypes.INTEGER, references: { model: 'Restaurant', key: 'RestaurantID' } },
   TableID: { type: DataTypes.INTEGER, references: { model: 'Table', key: 'TableID' } },
+
   ReservationTime: DataTypes.DATE,
   Duration: DataTypes.INTEGER,
   NumberOfPeople: DataTypes.INTEGER,
@@ -457,38 +458,43 @@ Reservation.deleteItem = async (id) => {
 
 // List operations
 
-Restaurant.prototype.getReservations = async function(tableIds, startDate, endDate) {
+Restaurant.prototype.getReservations = async function(startDate, endDate) {
   try {
+    const whereClause = {
+      RestaurantID: this.RestaurantID,
+    };
+
+    if (startDate && endDate) {
+      whereClause.ReservationTime = {
+        [DataTypes.Op.between]: [startDate, endDate]
+      };
+    }
+
     return await Reservation.findAll({
-      where: {
-        RestaurantID: this.RestaurantID,
-        TableID: tableIds,
-        ReservationTime: {
-          [DataTypes.Op.between]: [startDate, endDate]
-        }
-      }
+      where: whereClause,
+      include: Table
     });
   } catch (error) {
     throw error;
   }
 };
 
-Restaurant.prototype.getTables = async function(startDate, endDate) {
+Restaurant.prototype.getTables = async function() {
   try {
-    return await Table.findAll({
+
+    const tables = await Table.findAll({
       where: {
         RestaurantID: this.RestaurantID,
-      },
-      include: [{
-        model: Reservation,
-        where: {
-          ReservationTime: {
-            [DataTypes.Op.between]: [startDate, endDate]
-          }
-        },
-        required: false
-      }]
+      }
     });
+
+      if (!tables) {
+        return null;
+      };
+
+      console.log(tables)
+
+      return tables;
   } catch (error) {
     throw error;
   }

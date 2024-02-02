@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { CenteredSection, VerticalContainer, StyledH1, PrimaryButton, LeftAlignSection, StyledLabel, StyledInput, HorizontalContainer  } from '../components/styles.js';
+import { CenteredSection, VerticalContainer, StyledH1, PrimaryButton, LeftAlignSection, StyledLabel, StyledInput, HorizontalContainer, StyledPopup  } from '../components/styles.js';
 import { fetchRestaurantForUser } from '../api/fetchRestaurantForUser.js'
 import { createRestaurant } from '../api/createRestaurant.js'
 import { updateRestaurant } from '../api/updateRestaurant.js'
 import { uploadRestaurantPhotos } from '../api/uploadRestaurantPhotos.js';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from "react-router-dom";
 import { setRestaurantId } from '../redux/store.js';
 import { useQuery } from 'react-query';
 
@@ -24,6 +25,8 @@ function RestaurantTab() {
 const [originalPhotoUrls, setOriginalPhotoUrls] = useState({ CoverPhoto: null, ProfilePhoto: null });
 const [currentPhotos, setCurrentPhotos] = useState({ CoverPhoto: null, ProfilePhoto: null });
 const restaurantId = useSelector(state => state.restaurantId);
+const [isSubmitting, setIsSubmitting] = useState(false);
+
 
 const dispatch = useDispatch();
 
@@ -71,6 +74,7 @@ const handleChange = (event) => {
 
 const handleSubmit = async (event) => {
   event.preventDefault();
+  setIsSubmitting(true);
   try {
 
     const { CoverPhoto, ProfilePhoto, ...otherFields } = formState;
@@ -94,10 +98,18 @@ const handleSubmit = async (event) => {
     };
 
     if (restaurantId) {
+      try {
+      console.log('updating restaurant')
+      console.log(restaurantId, restaurantData);
       const updatedRestaurant = await updateRestaurant(restaurantId, restaurantData);
-      
+
       console.log(updatedRestaurant);
+
       alert('Restaurant updated successfully!');
+      } catch (error) {
+        console.error(error);
+      }
+      
     } else {
       const newRestaurant = await createRestaurant(restaurantData);
       dispatch(setRestaurantId(newRestaurant.RestaurantID));
@@ -107,26 +119,28 @@ const handleSubmit = async (event) => {
   } catch (error) {
     console.error(error);
   };
+  setIsSubmitting(false);
 };
 
 return (
+  <>
   <LeftAlignSection>
     <StyledH1>Add a new Restaurant</StyledH1>
     <form onSubmit={handleSubmit}>
-    <VerticalContainer $fitContent={true} $maxWidth="800px">
+    <VerticalContainer $fitContent={true} $maxWidth={"800px"}>
     {Object.keys(formState).map((key) => (
         <HorizontalContainer key={key}>
           <StyledLabel htmlFor={key}>{key}</StyledLabel>
           {key === 'CoverPhoto' || key === 'ProfilePhoto' ? (
-            <>
+            <VerticalContainer $align="center">
+              {formState[key] && <img src={formState[key]} alt={key} style={{ width: '100px', height: '100px' }} />}
               <StyledInput 
                 type="file" 
                 id={key} 
                 name={key} 
                 onChange={handleChange} 
               />
-              {formState[key] && <img src={formState[key]} alt={key} style={{ width: '100px', height: '100px' }} />}
-            </>
+            </VerticalContainer>
           ) : (
             <StyledInput 
               type="text" 
@@ -144,6 +158,17 @@ return (
       </VerticalContainer>
     </form>
   </LeftAlignSection>
+  {isLoading || isSubmitting && (
+    <StyledPopup>
+      <div className="content">
+        Loading...
+      </div>
+    </StyledPopup>
+  )}
+  {restaurantId && (
+    <Link to={`/reserve/${restaurantId}`}>Go to Reservation Page</Link>
+  )}
+  </>
 );
 }
 

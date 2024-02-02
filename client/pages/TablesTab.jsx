@@ -11,13 +11,16 @@ const TablesTab = () => {
   const queryClient = useQueryClient();
   const [showPopup, setShowPopup] = useState(false);
   const restaurantId = useSelector(state => state.restaurantId);
-
-  const [formState, setFormState] = useState({
+  const [validationError, setValidationError] = useState(false);
+  
+  const initialFormState = {
     CapacityMin: '',
     CapacityMax: '',
-    Quantity: '',
     TableNumber: '',
-  });
+  };
+  
+  // Use the initial form state when creating the formState state variable
+  const [formState, setFormState] = useState(initialFormState);
 
   const handleChange = (event) => {
     setFormState({
@@ -31,14 +34,20 @@ const TablesTab = () => {
   const mutationOnDelete = useMutation(deleteTable, {
     onSuccess: () => {
       queryClient.refetchQueries(['tables', restaurantId]);
+      alert("Table Deleted");
     },
   });
 
-  console.log(mutationOnDelete)
 
   const mutationOnCreation = useMutation(createTable, {
     onSuccess: () => {
       queryClient.refetchQueries(['tables', restaurantId]);
+      alert("Table Created");
+      setShowPopup(false);
+      setFormState(initialFormState);
+    },
+    onError: () => {
+      console.log('error');
     },
   });
 
@@ -50,9 +59,23 @@ const TablesTab = () => {
     setShowPopup(true);
   };
 
-  const handleAddTable = () => {
-    mutationOnCreation.mutate (restaurantId, formState)
-    setShowPopup(false);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (formState.CapacityMax < formState.CapacityMin) {
+      // Show an alert and stop the function
+      alert("CapacityMax Must be equal or higher then CapacityMin");
+      setValidationError(true);
+      return;
+    }
+
+    const tInt = parseInt(formState.TableNumber, 10);
+    if (tables.some(table => table.TableNumber === tInt)) {
+      alert("A table with this number already exists.");
+      return;
+    }
+  
+    setValidationError(false);
+    mutationOnCreation.mutate({ restaurantId, formState });
   };
 
   const handleClose = () => {
@@ -69,10 +92,10 @@ const TablesTab = () => {
       {showPopup && (
         <div className="popup">
           <button onClick={handleClose}>Close</button>
-          <div>Popup content goes here</div>
+          {/* <div>Popup content goes here</div> */}
             <form onSubmit={handleSubmit}>
-              <VerticalContainer fitContent maxWidth="800px">
-                {['CapacityMin', 'CapacityMax', 'Quantity', 'TableNumber'].map((key) => (
+              <VerticalContainer $fitContent={true} $maxWidth={"800px"}>
+                {['CapacityMin', 'CapacityMax', 'TableNumber'].map((key) => (
                   <HorizontalContainer key={key}>
                     <StyledLabel htmlFor={key}>{key}</StyledLabel>
                     <StyledInput 
@@ -81,6 +104,7 @@ const TablesTab = () => {
                       name={key} 
                       value={formState[key]} 
                       onChange={handleChange} 
+                      isError={key === 'CapacityMax' && validationError}
                     />
                   </HorizontalContainer>
                 ))}
@@ -93,15 +117,15 @@ const TablesTab = () => {
       )}
 
       <StyledTable>
-        <StyledTableHeader>
-          <StyledTableRow>
-            <th>Table Number</th>
-            <th>Capacity Min</th>
-            <th>Capacity Max</th>
-            <th>Quantity</th>
-            <th>Actions</th>
-          </StyledTableRow>
-        </StyledTableHeader>
+      <StyledTableHeader>
+        <tr>
+          <th>Table Number</th>
+          <th>Capacity Min</th>
+          <th>Capacity Max</th>
+          <th>Quantity</th>
+          <th>Actions</th>
+        </tr>
+      </StyledTableHeader>
         <tbody>
           {tables.map((table) => (
             <StyledTableRow key={table.TableID}>

@@ -11,7 +11,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 // import NotFoundPage from './pages/NotFoundPage';
 import DashboardPage from './pages/DashboardPage';
-// import ReservationPage from './pages/ReservationPage.js';
+import ReservationPage from './pages/ReservationPage.jsx';
 // import PersonalPage from './pages/PersonalPage';
 
 const queryClient = new QueryClient();
@@ -27,8 +27,8 @@ root.render(
             <Route path="/login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/dashboard/*" element={<DashboardPage />} />
-            {/* <Route path="/reservation" element={<ReservationPage />} />
-            <Route path="/personal" element={<PersonalPage />} />
+            <Route path="/reserve/:id" element={<ReservationPage />} />
+            {/* <Route path="/personal" element={<PersonalPage />} />
             <Route path="*" element={<NotFoundPage />} /> */}
           </Routes>
         </Router>

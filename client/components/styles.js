@@ -7,8 +7,8 @@ export const CenteredSection = styled.section`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  max-width: ${props => props.maxWidth || 'none'};
-  width: ${props => (props.fitContent ? 'fit-content' : 'auto')};
+  max-width: ${props => props.$maxWidth || 'none'};
+  width: ${props => (props.$fitContent ? 'fit-content' : 'auto')};
 `;
 
 export const LeftAlignSection = styled.section`
@@ -16,15 +16,16 @@ export const LeftAlignSection = styled.section`
   flex-direction: column;
   align-items: left;
   justify-content: left;
-  max-width: ${props => props.maxWidth || 'none'};
-  width: ${props => (props.fitContent ? 'fit-content' : 'auto')};
+  max-width: ${props => props.$maxWidth || 'none'};
+  width: ${props => (props.$fitContent ? 'fit-content' : 'auto')};
 `;
 
 export const VerticalContainer = styled.div`
   display: flex;
   flex-direction: column;
-  max-width: ${props => props.maxWidth || 'none'};
-  width: ${props => (props.fitContent ? 'fit-content' : 'auto')};
+  align-items: ${props => props.$align || 'stretch'};
+  max-width: ${props => props.$maxWidth || 'none'};
+  width: ${props => (props.$fitContent ? 'fit-content' : 'auto')};
 `;
 
 export const HorizontalContainer = styled.div`
@@ -120,7 +121,7 @@ export const StyledTableCell = styled.td`
   padding: 8px;
 `;
 
-export const StyledTableHeader = styled.th`
+export const StyledTableHeader = styled.thead`
   border: 1px solid #ddd;
   padding: 8px;
   background-color: #f2f2f2;
@@ -199,6 +200,7 @@ export const StyledInput = styled.input`
   font-family: 'Libre Franklin', sans-serif;
   color: #000000;
   max-width: 500px;
+  border-color: ${props => props.isError ? 'red' : 'defaultBorderColor'};
 
   &:focus {
     border-color: #007bff;
@@ -207,4 +209,48 @@ export const StyledInput = styled.input`
   }
 `;
 
+export const StyledFileInput = styled.div`
+  position: relative;
+  width: 200px;
+  height: 40px;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+  line-height: 40px;
+  text-align: center;
+  cursor: pointer;
+  overflow: hidden;
+  font-family: 'Libre Franklin', sans-serif;
+
+  & input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+`;
+
+export const StyledPopup = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+
+  & .content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    font-family: 'Libre Franklin', sans-serif;
+  }
+`;
 // Add more styled components as needed
