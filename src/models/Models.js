@@ -532,6 +532,8 @@ Restaurant.findAvailableSlots = async function(restaurantId, date, partySize) {
     // Fetch the tables for the restaurant
 const tables = await restaurant.getTables();
 
+console.log(tables)
+
 // Filter out slots that conflict with existing reservations
 const availableSlots = slots.filter(slot => {
   // Convert slot to a Date object for comparison
@@ -550,19 +552,19 @@ const availableSlots = slots.filter(slot => {
   // Check if there are enough tables available for the party size
   const availableTables = tables.filter(table => { 
     console.log('Table:', table);
-    table.dataValues.CapacityMin <= partySize && table.dataValues.CapacityMax >= partySize
+    return table.dataValues.CapacityMin <= partySize && table.dataValues.CapacityMax >= partySize;
   });
   console.log('Available tables:', availableTables);
 
   const bookedTables = conflictingReservations.map(reservation => {
     console.log('Reservation:', reservation);
-    reservation.tableId
+    return reservation.tableId;
   });
   console.log('Booked tables:', bookedTables); // Log booked tables
 
   const unbookedTables = availableTables.filter(table => {
     console.log('Table:', table);
-    !bookedTables.includes(table.id)
+    return !bookedTables.includes(table.id);
   });
   console.log('Unbooked tables:', unbookedTables); // Log unbooked tables
 

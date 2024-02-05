@@ -105,6 +105,17 @@ export const PrimaryButton = styled.button`
   width: fit-content;
 `;
 
+export const SecondaryButton = styled.button`
+  color: #000000;
+  background-color: #ffffff;
+  font-family: 'Libre Franklin', sans-serif;
+  font-size: 1em;
+  border-radius: 3px;
+  padding: 0.25em 1em;
+  margin: 0.5em;
+  width: fit-content;
+`;
+
 export const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
