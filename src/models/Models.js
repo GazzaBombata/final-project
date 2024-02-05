@@ -1,4 +1,4 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes, Op } from 'sequelize';
 import { sequelize } from '../database.js';
 import { createUser } from '../userfront/createUser.js';
 import { getUser } from '../userfront/getUser.js';
@@ -458,6 +458,7 @@ Reservation.deleteItem = async (id) => {
 
 // List operations
 
+
 Restaurant.prototype.getReservations = async function(startDate, endDate) {
   try {
     const whereClause = {
@@ -466,7 +467,7 @@ Restaurant.prototype.getReservations = async function(startDate, endDate) {
 
     if (startDate && endDate) {
       whereClause.ReservationTime = {
-        [DataTypes.Op.between]: [startDate, endDate]
+        [Op.between]: [startDate, endDate]
       };
     }
 
@@ -492,10 +493,85 @@ Restaurant.prototype.getTables = async function() {
         return null;
       };
 
-      console.log(tables)
-
       return tables;
   } catch (error) {
+    throw error;
+  }
+};
+
+Restaurant.findAvailableSlots = async function(restaurantId, date, partySize) {
+  try {
+    const restaurant = await Restaurant.findByPk(restaurantId);
+
+    const openingTime = restaurant.OpeningTime;
+    const intOpeningTime = parseInt(openingTime.split(':')[0]);
+
+    const closingTime = restaurant.ClosingTime;
+    const intClosingTime = parseInt(closingTime.split(':')[0]);
+
+    let startDate = new Date(date);
+    startDate.setHours(openingTime.split(':')[0]);
+
+    let endDate = new Date(date);
+    endDate.setHours(closingTime.split(':')[0]);
+
+    const reservations = await restaurant.getReservations(startDate, endDate);
+
+    console.log(reservations)
+
+    // Generate all possible slots for the day
+    let slots = [];
+    for (let hour = intOpeningTime; hour < intClosingTime; hour++) { 
+      for (let minutes = 0; minutes < 60; minutes += 30) { 
+        slots.push(`${hour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`);
+      }
+    }
+
+    console.log(slots)
+
+    // Fetch the tables for the restaurant
+const tables = await restaurant.getTables();
+
+// Filter out slots that conflict with existing reservations
+const availableSlots = slots.filter(slot => {
+  // Convert slot to a Date object for comparison
+  const slotStartTime = new Date(`${date}T${slot}:00`);
+  const slotEndTime = new Date(slotStartTime.getTime() + 30 * 60000); // Add 30 minutes
+
+  // Check if slot overlaps with any reservation
+  const conflictingReservations = reservations.filter(reservation => {
+    const reservationStartTime = new Date(`${date}T${reservation.reservationTime}`);
+    const reservationEndTime = new Date(reservationStartTime.getTime() + 60 * 60000); // Assuming 1-hour duration
+
+    // Check for overlap
+    return slotStartTime < reservationEndTime && slotEndTime > reservationStartTime;
+  });
+
+  // Check if there are enough tables available for the party size
+  const availableTables = tables.filter(table => { 
+    console.log('Table:', table);
+    table.dataValues.CapacityMin <= partySize && table.dataValues.CapacityMax >= partySize
+  });
+  console.log('Available tables:', availableTables);
+
+  const bookedTables = conflictingReservations.map(reservation => {
+    console.log('Reservation:', reservation);
+    reservation.tableId
+  });
+  console.log('Booked tables:', bookedTables); // Log booked tables
+
+  const unbookedTables = availableTables.filter(table => {
+    console.log('Table:', table);
+    !bookedTables.includes(table.id)
+  });
+  console.log('Unbooked tables:', unbookedTables); // Log unbooked tables
+
+  return unbookedTables.length > 0;
+});
+      console.log(availableSlots)
+      return availableSlots;
+  } catch (error) {
+    console.error('Error querying available slots:', error);
     throw error;
   }
 };

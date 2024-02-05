@@ -200,11 +200,13 @@ app.get('/v1/restaurants/:id', verifyJwt, async (req, res) => {
   try {
     const restaurant = await Restaurant.readItem(req.params.id);
     if (restaurant) {
+      console.log(restaurant)
       res.json(restaurant);
     } else {
       res.status(404).json({ message: 'Restaurant not found' }); // Not Found
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
   }
 });
@@ -406,6 +408,24 @@ app.post('/v1/webhook', async (req, res) => {
   } catch (error) {
     console.log(error)
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
+  }
+});
+
+app.post('/v1/availableSlots', verifyJwt, async (req, res) => {
+  console.log('fetching available slots')
+  try {
+    const { restaurantId, date, partySize } = req.body;
+
+    if (!restaurantId || !date || !partySize) {
+      console.log('missing required fields')
+        return res.status(400).send({ message: 'Missing required fields' });
+    }
+
+    const availableSlots = await Restaurant.findAvailableSlots(restaurantId, date, partySize);
+    res.send({ availableSlots });
+  } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: 'Error fetching available slots' });
   }
 });
 

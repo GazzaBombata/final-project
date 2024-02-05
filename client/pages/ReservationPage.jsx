@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { fetchRestaurant } from '../api/fetchRestaurant.js'; 
-// import CalendarComponent from './CalendarComponent'; // Replace with your actual calendar component
+import CalendarComponent from '../components/CalendarComponent.jsx';
 
 function ReservationPage() {
   const { id } = useParams();
@@ -26,7 +26,7 @@ function ReservationPage() {
       <p>{restaurant.Email}</p>
       <p>Opening Time: {restaurant.OpeningTime}</p>
       <p>Closing Time: {restaurant.ClosingTime}</p>
-      {/* <CalendarComponent /> */}
+      <CalendarComponent />
     </div>
   );
 }
