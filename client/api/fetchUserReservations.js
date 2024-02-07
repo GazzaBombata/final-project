@@ -2,13 +2,12 @@ import Userfront from "@userfront/core";
 
 Userfront.init("wn9vz89b");
 
-export const fetchReservations = async (restaurantID) => {
+export const fetchUserReservations = async (restaurantID) => {
   let res;
-  console.log(restaurantID, 'restaurantID')
 
   try {
   
-    res = await fetch(`http://localhost:8080/v1/restaurants/${restaurantID}/reservations`, {
+    res = await fetch(`http://localhost:8080/v1/reservations`, {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
       },

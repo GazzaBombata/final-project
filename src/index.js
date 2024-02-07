@@ -80,6 +80,12 @@ app.get('/', (req, res) => {
 
 // User endpoints
 
+app.get('/v1/check-login', verifyJwt, (req, res) => {
+  // If the JWT is valid and not expired, req.user will contain the decoded token
+  res.json({ message: 'Token is valid', user: req.user });
+});
+
+
 app.get('/v1/users/:id', verifyJwt, async (req, res) => {
   try {
     
@@ -196,10 +202,11 @@ app.post('/v1/restaurants', verifyJwt, async (req, res) => {
   }
 });
 
-app.get('/v1/restaurants/:id', verifyJwt, async (req, res) => {
+app.get('/v1/restaurants/:id', async (req, res) => {
   try {
     const restaurant = await Restaurant.readItem(req.params.id);
     if (restaurant) {
+      delete restaurant.dataValues.OwnerUserID; // Delete OwnerUserID
       console.log(restaurant)
       res.json(restaurant);
     } else {
@@ -298,6 +305,21 @@ app.post('/v1/reservations', verifyJwt, async (req, res) => {
   }
 });
 
+app.get('/v1/reservations', verifyJwt, async (req, res) => {
+  try {
+    const user = await User.findOne({ where: { UserfrontUserId: req.user.userId } });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const reservations = await user.getReservations();
+
+    res.json(reservations)
+  } catch (error) {
+    res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
+  }
+});
+
 app.get('/v1/reservations/:id', verifyJwt, async (req, res) => {
   try {
     const reservation = await Reservation.readItem(req.params.id);
@@ -344,6 +366,7 @@ app.get('/v1/restaurants/:id/reservations', verifyJwt, async (req, res) => {
     const reservations = await restaurant.getReservations();
     res.json(reservations);
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
   }
 });
@@ -411,7 +434,7 @@ app.post('/v1/webhook', async (req, res) => {
   }
 });
 
-app.post('/v1/availableSlots', verifyJwt, async (req, res) => {
+app.post('/v1/availableSlots', async (req, res) => {
   console.log('fetching available slots')
   try {
     const { restaurantId, date, partySize } = req.body;

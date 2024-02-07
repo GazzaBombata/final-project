@@ -10,7 +10,7 @@ import {  useSelector } from 'react-redux';
 const TablesTab = () => {
   const queryClient = useQueryClient();
   const [showPopup, setShowPopup] = useState(false);
-  const restaurantId = useSelector(state => state.restaurantId);
+  const restaurantId = useSelector(state => state.restaurant.restaurantId);
   const [validationError, setValidationError] = useState(false);
   
   const initialFormState = {

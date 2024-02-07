@@ -3,27 +3,34 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { fetchAvailableSlots } from '../api/fetchAvailableSlots.js';
 import { createReservation } from '../api/createReservation.js';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from 'react-query'
 import { format as formatDate } from 'date-fns';
-import { PrimaryButton, SecondaryButton, VerticalContainer, HorizontalContainer, StyledPopup } from '../components/styles.js';
+import { PrimaryButton, SecondaryButton, VerticalContainer, HorizontalContainer, StyledPopup, StyledInput, StyledLabel } from '../components/styles.js';
+import Userfront from "@userfront/core";
+import { fetchRestaurant } from '../api/fetchRestaurant.js';
+import { useDispatch, useSelector } from 'react-redux';
+import { setRedirectUrl } from '../redux/store.js';
+import { setDate } from '../redux/store.js';
+import resetStates from '../functions-hooks/resetStates.js'
+import { formatISO, isValid } from 'date-fns';
+
+Userfront.init("wn9vz89b");
 
 function CalendarComponent() {
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [value, setValue] = useState(new Date());
-  const [date, setDate] = useState({
-    justDate: null,
-    dateTime: null,
-  });
+  const date = useSelector(state => state.date);
   const [partySize, setPartySize] = useState(2);
   const [slots, setSlots] = useState([]);
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // isLoggedIn status
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
 
   const { id } = useParams();
-
-  useEffect(() => {
-    checkLoggedIn(); // Function to check if the user is logged in
-    getTimes();
-  }, [date.justDate]);
+  const { data: restaurant, isLoading, error } = useQuery(['restaurant', id], () => fetchRestaurant(id));
 
   const checkLoggedIn = () => {
     // Check if the user is logged in (has Userfront.tokens.accessToken)
@@ -34,9 +41,18 @@ function CalendarComponent() {
     }
   };
 
+
+  useEffect(() => {
+    checkLoggedIn(); // Function to check if the user is logged in
+    getTimes();
+    console.log(date);
+  }, [date.justDate]);
+
   const onChange = async (newValue) => {
     setValue(newValue);
-    setDate((prev) => ({ ...prev, justDate: newValue }));
+    console.log(newValue.toISOString());
+    dispatch(setDate({ justDate: newValue.toISOString() }));
+  
   };
 
   const maxDate = new Date();
@@ -46,58 +62,98 @@ function CalendarComponent() {
     if (!date.justDate) {
       return;
     }
-    const response = await fetchAvailableSlots(id, date.justDate, partySize);
+    const justDateObj = new Date(date.justDate);
+    console.log(justDateObj)
+    const response = await fetchAvailableSlots(id, justDateObj, partySize);
     setSlots(response.availableSlots);
   };
 
   const handleClick = (e) => {
-    console.log(e.target.innerText);
-    console.log('slot selected');
-    setDate((prev) => ({ ...prev, dateTime: e.target.innerText }));
+    dispatch(setDate({ dateTime: e.target.innerText}));
+    if (!isLoggedIn) {
+      alert('You need to login to create a reservation, we will redirect you to login / signup page.');
+
+      dispatch(setRedirectUrl(window.location.href));
+
+      navigate('/login');
+    }
   };
 
-  const createRes = () => {
-    console.log('Reservation created');
-    // here I need to add a function that if the user is lot logged in check s if it exists and retrieve it, if it doesn't exist it will create it
-    createReservation(id, date.justDate, date.dateTime, partySize);
+  const createRes = async () => {
+    if (slots.length === 0) {
+      await getTimes();
+    }
+
+    // Use date.dateTime instead of slot
+    const slotInfo = slots.find(s => s.slot === date.dateTime);
+    console.log(slotInfo);
+  
+    if (slotInfo && slotInfo.tableIds.length > 0) { 
+      const justDateObj = new Date(date.justDate);
+      const response = await createReservation(id, justDateObj, date.dateTime, partySize, slotInfo.tableIds[0]);
+  
+      if (response.ReservationID) {
+        resetStates();
+        navigate('/personal');
+      } else {
+        console.log(response.error)
+      }
+    }
   };
 
   const showPopup = () => {
     if (date.dateTime) {
       return (
         <StyledPopup>
-          <div>
-            <p>Date: {formatDate(date.justDate, 'yyyy-MM-dd')}</p>
+          <div className="content">
+            <p>Restaurant: {restaurant.Name}</p>
+            <p>Date: {formatDate(date.justDate, 'dd-MM-yyyy')}</p>
             <p>Time: {date.dateTime}</p>
             <p>Party Size: {partySize}</p>
-            <p>Restaurant: Restaurant Name</p>
             {/* Additional restaurant details */}
             {!isLoggedIn && <input type="email" placeholder="Enter your email" />}
-            <button onClick={createRes}>Create Reservation</button>
+            <PrimaryButton onClick={createRes}>Create Reservation</PrimaryButton>
+            <SecondaryButton onClick={handleDateTimeReset}>
+              Indietro
+            </SecondaryButton>
           </div>
         </StyledPopup>
       );
     }
   };
 
+  const handleDateReset = () => {
+    dispatch(setDate({ justDate: null }));
+  }
+
+  const handleDateTimeReset = () => {
+    dispatch(setDate({ dateTime: null }));
+  }
+
   return (
     <div>
+      <StyledLabel>
+        <VerticalContainer>
+          Party Size:
+          <StyledInput type="number" value={partySize} onChange={(e) => setPartySize(e.target.value)} />
+        </VerticalContainer>
+      </StyledLabel>
       {date.justDate ? (
         <VerticalContainer>
           <HorizontalContainer>
             {slots.map((slot) => {
-              const dateStr = formatDate(date.justDate, 'yyyy-MM-dd');
+              const dateStr = formatDate(new Date(date.justDate), 'yyyy-MM-dd');
 
-              const dateTime = new Date(`${dateStr}T${slot}`);
+              const dateTime = new Date(`${dateStr}T${slot.slot}`);
 
               return (
-                <PrimaryButton key={slot} onClick={handleClick}>
+                <PrimaryButton key={slot.slot} onClick={handleClick}>
                   {formatDate(dateTime, 'HH:mm')}
                 </PrimaryButton>
               );
             })}
           </HorizontalContainer>
-          <SecondaryButton onClick={() => setDate({ justDate: null, dateTime: null })}>
+          <SecondaryButton onClick={handleDateReset}>
             Indietro
           </SecondaryButton>
         </VerticalContainer>

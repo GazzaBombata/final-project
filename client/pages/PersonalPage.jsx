@@ -1,23 +1,49 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
-import { fetchReservations } from '../api/fetchReservations.js';
+import { fetchUserReservations } from '../api/fetchUserReservations.js';
 import { deleteReservation } from '../api/deleteReservation.js';
 import { StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader  } from '../components/styles.js';
 import { useSelector } from 'react-redux';
 import { format, parseISO } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import Userfront from "@userfront/core"; 
+import { Navigate } from 'react-router-dom';
+import { checkLogin } from '../api/checkLogin.js';
+import { useEffect } from 'react';
+
+Userfront.init("wn9vz89b");
 
 
-const ReservationsTab = () => {
+const PersonalPage = () => {
+  
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkUserLogin = async () => {
+      const result = await checkLogin();
+      setIsLoggedIn(result);
+    };
+  
+    checkUserLogin();
+  }, []);
+
+  if (!Userfront.accessToken) {
+    return <Navigate to="/login" replace />
+  } else {
+    if (!isLoggedIn) {
+      return <Navigate to="/login" replace />
+    }
+  }
+
+
   const queryClient = useQueryClient();
-  const [showPopup, setShowPopup] = useState(false);
-  const restaurantId = useSelector(state => state.restaurant.restaurantId);
   const [validationError, setValidationError] = useState(false);
 
-  const { data: reservations, isLoading, isError } = useQuery(['reservations', restaurantId], () => fetchReservations(restaurantId));
+  const { data: reservations, isLoading, isError } = useQuery(['reservations'], () => fetchUserReservations());
 
   const mutationOnDelete = useMutation(deleteReservation, {
     onSuccess: () => {
-      queryClient.refetchQueries(['reservations', restaurantId]);
+      queryClient.refetchQueries(['reservations']);
       alert("Reservation Deleted");
     },
   });
@@ -64,4 +90,4 @@ const ReservationsTab = () => {
   );
 };
 
-export default ReservationsTab;
+export default PersonalPage;

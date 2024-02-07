@@ -4,6 +4,7 @@ import { createUser } from '../userfront/createUser.js';
 import { getUser } from '../userfront/getUser.js';
 import { deleteUser } from '../userfront/deleteUser.js';
 import { makeUserAdmin } from '../userfront/makeUserAdmin.js'; 
+import { format } from 'date-fns';
 
 const User = sequelize.define('User', {
   UserID: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
@@ -193,6 +194,27 @@ User.makeAdmin = async (userFrontUserId) => {
   
   return await makeUserAdmin(userFrontUserId);
 }
+
+User.prototype.getReservations = async function(startDate, endDate) {
+  try {
+    const where = { UserID: this.UserID };
+    if (startDate && endDate) {
+      where.ReservationTime = {
+        [Op.between]: [startDate, endDate]
+      };
+    }
+    return await Reservation.findAll({
+      where,
+      include: [
+        { model: Restaurant },
+        { model: Table }
+      ]
+    });
+  } catch (error) {
+    console.log(error)
+    throw error;
+  }
+};
 
 // Restaurant CRUD operations
 Restaurant.createItem = async (owner, item) => {
@@ -503,17 +525,21 @@ Restaurant.findAvailableSlots = async function(restaurantId, date, partySize) {
   try {
     const restaurant = await Restaurant.findByPk(restaurantId);
 
+    const formattedDate = format(date, 'yyyy-MM-dd');
+
     const openingTime = restaurant.OpeningTime;
     const intOpeningTime = parseInt(openingTime.split(':')[0]);
 
     const closingTime = restaurant.ClosingTime;
     const intClosingTime = parseInt(closingTime.split(':')[0]);
 
-    let startDate = new Date(date);
+    let startDate = new Date(formattedDate);
     startDate.setHours(openingTime.split(':')[0]);
+    console.log(startDate)
 
-    let endDate = new Date(date);
+    let endDate = new Date(formattedDate);
     endDate.setHours(closingTime.split(':')[0]);
+    console.log(endDate)
 
     const reservations = await restaurant.getReservations(startDate, endDate);
 
@@ -527,51 +553,65 @@ Restaurant.findAvailableSlots = async function(restaurantId, date, partySize) {
       }
     }
 
-    console.log(slots)
 
     // Fetch the tables for the restaurant
 const tables = await restaurant.getTables();
 
-console.log(tables)
-
 // Filter out slots that conflict with existing reservations
-const availableSlots = slots.filter(slot => {
+const availableSlots = slots.map(slot => {
+  console.log(`Checking slot at ${slot}`);
+  console.log(date)
   // Convert slot to a Date object for comparison
-  const slotStartTime = new Date(`${date}T${slot}:00`);
+  const slotStartTime = new Date(`${formattedDate}T${slot}:00`);
   const slotEndTime = new Date(slotStartTime.getTime() + 30 * 60000); // Add 30 minutes
+  console.log(`Slot start time: ${slotStartTime}, slot end time: ${slotEndTime}`)
 
   // Check if slot overlaps with any reservation
   const conflictingReservations = reservations.filter(reservation => {
-    const reservationStartTime = new Date(`${date}T${reservation.reservationTime}`);
-    const reservationEndTime = new Date(reservationStartTime.getTime() + 60 * 60000); // Assuming 1-hour duration
-
+    console.log(`Checking reservation at ${reservation.dataValues.ReservationTime}`)
+    const reservationStartTime = reservation.dataValues.ReservationTime;
+    const reservationEndTime = new Date(reservationStartTime.getTime() + 30 * 60000); // Assuming 30 minutes duration
+  
     // Check for overlap
-    return slotStartTime < reservationEndTime && slotEndTime > reservationStartTime;
+    const isOverlapping = slotStartTime < reservationEndTime && slotEndTime > reservationStartTime;
+    console.log(`Checking reservation at ${reservationStartTime}: overlaps with slot? ${isOverlapping}`);
+    return isOverlapping;
   });
-
+  
   // Check if there are enough tables available for the party size
   const availableTables = tables.filter(table => { 
-    console.log('Table:', table);
-    return table.dataValues.CapacityMin <= partySize && table.dataValues.CapacityMax >= partySize;
+    const isAvailable = table.dataValues.CapacityMin <= partySize && table.dataValues.CapacityMax >= partySize;
+    return isAvailable;
   });
-  console.log('Available tables:', availableTables);
-
+  
   const bookedTables = conflictingReservations.map(reservation => {
-    console.log('Reservation:', reservation);
-    return reservation.tableId;
+    console.log(`Reservation at ${reservation.dataValues.ReservationTime} has booked table ID ${reservation.dataValues.TableID}`);
+    return reservation.dataValues.Table;
   });
-  console.log('Booked tables:', bookedTables); // Log booked tables
-
+  
   const unbookedTables = availableTables.filter(table => {
-    console.log('Table:', table);
-    return !bookedTables.includes(table.id);
+    if (bookedTables.length === 0) {
+      return true;
+    }
+    console.log(table)
+    console.log(bookedTables)
+    const isUnbooked = !bookedTables.some(bookedTable => bookedTable.dataValues.TableID === table.dataValues.TableID);
+    console.log(`Checking table ID ${table.dataValues.TableID}: is unbooked? ${isUnbooked}`);
+    return isUnbooked;
   });
-  console.log('Unbooked tables:', unbookedTables); // Log unbooked tables
+  console.log(`Unbooked table IDs:`, unbookedTables.map(table => table.dataValues.TableID))
 
-  return unbookedTables.length > 0;
-});
-      console.log(availableSlots)
-      return availableSlots;
+  // Return the slot time and the available table IDs
+  return {
+    slot,
+    tableIds: unbookedTables.length > 0 ? unbookedTables.map(table => table.dataValues.TableID) : [],
+  };
+}).filter(slotInfo => slotInfo.tableIds.length > 0);
+
+console.log(availableSlots)
+
+return availableSlots;
+
   } catch (error) {
     console.error('Error querying available slots:', error);
     throw error;
