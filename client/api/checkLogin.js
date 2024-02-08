@@ -6,6 +6,10 @@ export const checkLogin = async () => {
 
   let res;
 
+  if (!Userfront.tokens.accessToken) {
+    return false;
+  }
+
   try {
     res = await fetch('http://localhost:8080/v1/check-login', {
       headers: {

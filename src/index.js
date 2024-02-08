@@ -72,16 +72,13 @@ const verifyJwt = async (req, res, next) => {
   }
 };
 
-app.get('/', (req, res) => {
-  res.send('Hello, World by final-project!');
-});
-
 
 
 // User endpoints
 
 app.get('/v1/check-login', verifyJwt, (req, res) => {
   // If the JWT is valid and not expired, req.user will contain the decoded token
+  console.log(req.user);
   res.json({ message: 'Token is valid', user: req.user });
 });
 
@@ -452,12 +449,13 @@ app.post('/v1/availableSlots', async (req, res) => {
   }
 });
 
-app.use(express.static('client/dist'));
 
-// Catch-all route handler
+// Serve the React application for all other paths
 app.get('*', (req, res) => {
+  console.log('GET *');
   res.sendFile(path.resolve(__dirname, '../client/dist', 'index.html'));
 });
+
 
 const port = process.env.PORT || 8080;
 

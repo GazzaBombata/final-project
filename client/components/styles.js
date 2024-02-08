@@ -20,10 +20,18 @@ export const LeftAlignSection = styled.section`
   width: ${props => (props.$fitContent ? 'fit-content' : 'auto')};
 `;
 
+export const NavSpan = styled.span`
+  color: red;
+  @media (max-width: 600px) {
+    display: none;
+  }
+`;
+
 export const VerticalContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: ${props => props.$align || 'stretch'};
+  gap: ${props => props.$gap || '0px'};
   max-width: ${props => props.$maxWidth || 'none'};
   width: ${props => (props.$fitContent ? 'fit-content' : 'auto')};
 `;
@@ -35,8 +43,27 @@ export const HorizontalContainer = styled.div`
   gap: 10px;
   justify-content: space-between;
   max-width: ${props => props.maxWidth || 'none'};
+  min-width: ${props => props.minWidth || 'none'};
   width: ${props => (props.fitContent ? 'fit-content' : 'auto')};
+  flex-wrap: ${props => (props.wrap ? 'wrap' : 'auto')};
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `;
+
+export const HorizontalLeftAlignContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: ${props => props.align || 'center'};
+  gap: 10px;
+  justify-content: flex-start;
+  max-width: ${props => props.maxWidth || 'none'};
+  min-width: ${props => props.minWidth || 'none'};
+  width: ${props => (props.fitContent ? 'fit-content' : 'auto')};
+  flex-wrap: ${props => (props.wrap ? 'wrap' : 'auto')};
+`;
+
 
 export const StyledH1 = styled.h1`
   font-size: 2em;
@@ -95,25 +122,51 @@ export const LeftAlignGreyP = styled.p`
 `;
 
 export const PrimaryButton = styled.button`
-  background-color: #000000;
-  color: #ffffff;
-  font-family: 'Libre Franklin', sans-serif;
-  font-size: 1em;
+
+  display: inline-block;
+  outline: none;
+  cursor: pointer;
   border-radius: 3px;
-  padding: 0.25em 1em;
-  margin: 0.5em;
-  width: fit-content;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  padding: 2px 16px;
+  height: 38px;
+  min-width: 96px;
+  min-height: 38px;
+  border: none;
+  color: #fff;
+  background-color: rgb(88, 101, 242);
+  transition: background-color .17s ease,color .17s ease;
+  :hover {
+      background-color: rgb(71, 82, 196);
+  }
+                
+    
 `;
 
+
+
 export const SecondaryButton = styled.button`
-  color: #000000;
-  background-color: #ffffff;
-  font-family: 'Libre Franklin', sans-serif;
-  font-size: 1em;
+
+  display: inline-block;
+  outline: none;
+  cursor: pointer;
   border-radius: 3px;
-  padding: 0.25em 1em;
-  margin: 0.5em;
-  width: fit-content;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+  margin: 10px 10px;
+  height: 32px;
+  min-width: 60px;
+  min-height: 32px;
+  max-width: 100px;
+  border: none;
+  color: #fff;
+  margin: ${props => props.margin || 'none'};
+  background-color: #4f545c;
+  transition: background-color .17s ease,color .17s ease;
+                
 `;
 
 export const StyledTable = styled.table`
@@ -189,6 +242,7 @@ export const StyledNavLink = styled(NavLink)`
 
 export const MainContentWithSideBar = styled.div`
   margin-left: 210px;
+  max-width: 800px;
 `;
 
 export const StyledLabel = styled.label`
@@ -200,24 +254,24 @@ export const StyledLabel = styled.label`
 `;
 
 export const StyledInput = styled.input`
-  box-sizing: border-box;
-  width: 200px;
-  height: 40px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  padding: 10px;
-  margin-bottom: 10px;
-  font-size: 1em;
-  font-family: 'Libre Franklin', sans-serif;
-  color: #000000;
-  max-width: 500px;
-  border-color: ${props => props.isError ? 'red' : 'defaultBorderColor'};
 
-  &:focus {
-    border-color: #007bff;
-    outline: none;
-    box-shadow: 0 0 5px rgba(0,123,255,.5);
+  border-radius: 5px;
+  background: rgb(249, 250, 250);
+  border: 1px solid rgb(181, 189, 196);
+  font-size: 16px;
+  height: 30px;
+  line-height: 24px;
+  padding: 7px 8px;
+  color: rgb(8, 9, 10);
+  box-shadow: none;
+  width: fit-content;
+  max-width: ${props => props.$maxWidth || 'none'};
+  :focus{
+      background-color: #fff;
+      border-color: #3b49df;
+      box-shadow: 1px 1px 0 #3b49df;
   }
+                
 `;
 
 export const StyledFileInput = styled.div`
@@ -263,5 +317,33 @@ export const StyledPopup = styled.div`
     text-align: center;
     font-family: 'Libre Franklin', sans-serif;
   }
+`;
+
+export const CoverPhoto = styled.div`
+  background-image: url(${props => props.$imageUrl});
+  background-size: cover;
+  background-position: center;
+  height: 200px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 50px;
+`;
+
+export const ProfilePhoto = styled.img`
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  bottom: -50px;
+  border: 3px solid white;
+  z-index: 1;
+`;
+
+export const DetailBox = styled.div`
+  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
 `;
 // Add more styled components as needed

@@ -127,14 +127,14 @@ return (
   <LeftAlignSection>
     <StyledH1>Add a new Restaurant</StyledH1>
     <form onSubmit={handleSubmit}>
-    <VerticalContainer $fitContent={true} $maxWidth={"800px"}>
+    <VerticalContainer $fitContent={true} $maxWidth={"800px"} $gap={"10px"}>
     {Object.keys(formState).map((key) => (
         <HorizontalContainer key={key}>
           <StyledLabel htmlFor={key}>{key}</StyledLabel>
           {key === 'CoverPhoto' || key === 'ProfilePhoto' ? (
-            <VerticalContainer $align="center">
+            <VerticalContainer $align="center" >
               {formState[key] && <img src={formState[key]} alt={key} style={{ width: '100px', height: '100px' }} />}
-              <StyledInput 
+              <StyledInput $maxWidth="200px"
                 type="file" 
                 id={key} 
                 name={key} 

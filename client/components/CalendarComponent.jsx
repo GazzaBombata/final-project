@@ -107,7 +107,7 @@ function CalendarComponent() {
         <StyledPopup>
           <div className="content">
             <p>Restaurant: {restaurant.Name}</p>
-            <p>Date: {formatDate(date.justDate, 'dd-MM-yyyy')}</p>
+            <p>Date:  {formatDate(date.justDate, 'dd-MM-yyyy')}</p>
             <p>Time: {date.dateTime}</p>
             <p>Party Size: {partySize}</p>
             {/* Additional restaurant details */}
@@ -131,16 +131,20 @@ function CalendarComponent() {
   }
 
   return (
-    <div>
+    <VerticalContainer>
       <StyledLabel>
         <VerticalContainer>
           Party Size:
-          <StyledInput type="number" value={partySize} onChange={(e) => setPartySize(e.target.value)} />
+          <StyledInput type="number" value={partySize} onChange={(e) => {
+              if (e.target.value >= 1) {
+                setPartySize(e.target.value);
+              }
+            }}  />
         </VerticalContainer>
       </StyledLabel>
       {date.justDate ? (
         <VerticalContainer>
-          <HorizontalContainer>
+          <HorizontalContainer maxWidth="800px" wrap={value.toString()}>
             {slots.map((slot) => {
               const dateStr = formatDate(new Date(date.justDate), 'yyyy-MM-dd');
 
@@ -153,7 +157,7 @@ function CalendarComponent() {
               );
             })}
           </HorizontalContainer>
-          <SecondaryButton onClick={handleDateReset}>
+          <SecondaryButton onClick={handleDateReset} margin="10px 0px">
             Indietro
           </SecondaryButton>
         </VerticalContainer>
@@ -161,7 +165,7 @@ function CalendarComponent() {
         <Calendar onChange={onChange} value={value} minDate={new Date()} maxDate={maxDate} />
       )}
       {showPopup()}
-    </div>
+    </VerticalContainer>
   );
 }
 

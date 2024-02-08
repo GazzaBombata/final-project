@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { createTable } from '../api/createTable.js';
 import { deleteTable } from '../api/deleteTable.js';
 import { fetchTables } from '../api/fetchTables.js';
-import { CenteredSection, VerticalContainer, StyledH1, PrimaryButton, LeftAlignSection, StyledLabel, StyledInput, HorizontalContainer, StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader  } from '../components/styles.js';
+import { CenteredSection, VerticalContainer, StyledH1, PrimaryButton, LeftAlignSection, StyledLabel, StyledInput, HorizontalContainer, StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader, SecondaryButton  } from '../components/styles.js';
 import {  useSelector } from 'react-redux';
 
 
@@ -134,7 +134,7 @@ const TablesTab = () => {
               <StyledTableCell>{table.CapacityMax}</StyledTableCell>
               <StyledTableCell>{table.Quantity}</StyledTableCell>
               <StyledTableCell>
-                <button onClick={() => handleDelete(table.TableID)}>Delete</button>
+                <SecondaryButton onClick={() => handleDelete(table.TableID)}>Delete</SecondaryButton>
               </StyledTableCell>
             </StyledTableRow>
           ))}

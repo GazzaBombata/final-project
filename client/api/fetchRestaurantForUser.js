@@ -4,6 +4,10 @@ Userfront.init("wn9vz89b");
 
 export const fetchRestaurantForUser = async () => {
 
+  if (!Userfront.tokens.accessToken) {
+    return false;
+  }
+
   let res;
 
   try {

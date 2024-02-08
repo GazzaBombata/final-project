@@ -15,6 +15,17 @@ import ReservationPage from './pages/ReservationPage.jsx';
 import PersonalPage from './pages/PersonalPage.jsx';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistor } from './redux/store.js';
+import { Grommet } from 'grommet';
+
+const theme = {
+  global: {
+    font: {
+      family: 'Roboto',
+      size: '14px',
+      height: '20px',
+    },
+  },
+};
 
 const queryClient = new QueryClient();
 const root = createRoot(document.getElementById('root'));
@@ -23,18 +34,19 @@ root.render(
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
-          <Router>
-            <Routes>
-              {/* <Route path="/" element={<HomePage />} /> */}
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/dashboard/*" element={<DashboardPage />} />
-              <Route path="/reserve/:id" element={<ReservationPage />} />
-              <Route path="/personal" element={<PersonalPage />} />
-              {/* <Route path="*" element={<NotFoundPage />} /> */}
-            </Routes>
-          </Router>
+          <Grommet theme={theme}>
+            <Router>
+              <Routes>
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/dashboard/*" element={<DashboardPage />} />
+                <Route path="/reserve/:id" element={<ReservationPage />} />
+                <Route path="/personal" element={<PersonalPage />} />
+                {/* <Route path="*" element={<NotFoundPage />} /> */}
+              </Routes>
+            </Router>
+          </Grommet>
         </PersistGate>
       </Provider>
     </QueryClientProvider>

@@ -1,45 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { useQuery } from 'react-query';
-import { Navigate } from 'react-router-dom';
+import { Navigate, NavLink } from 'react-router-dom';
 import { BrowserRouter as Router, Routes, Link, Route } from "react-router-dom";
 import { fetchRole } from '../functions-hooks/fetchRole.js'
 import RestaurantTab from './RestaurantTab.jsx';
 import TablesTab from './TablesTab.jsx';
 import ReservationsTab from './ReservationsTab.jsx';
-import { StyledSidebar, MainContentWithSideBar, StyledNavLink } from '../components/styles.js';
+import { StyledSidebar, MainContentWithSideBar, StyledNavLink, NavSpan, HorizontalContainer } from '../components/styles.js';
 import { useDispatch, useSelector } from 'react-redux';
 import { setRestaurantId } from '../redux/store.js';
 import { fetchRestaurantForUser } from '../api/fetchRestaurantForUser.js';
 import useRedirect from '../functions-hooks/useRedirect.js';
 import Userfront from "@userfront/core";
-import { checkLogin } from '../api/checkLogin.js';
+import { useNavigate } from 'react-router-dom';
+import { checkUserLogin } from '../api/checkUserLogin.js';
+import { Sidebar, Grommet, Avatar, Button, Nav, Main } from 'grommet';
+import { Cafeteria, Restaurant, UserNew } from 'grommet-icons';
+import LogoutButton from "../components/LogoutButton";
 
 Userfront.init("wn9vz89b");
 
 function DashboardPage() {
 
+const navigate = useNavigate();
+
 const redirectUrl = useSelector(state => state.redirect.redirectUrl);
 
 const [isLoadingRestaurant, setIsLoadingRestaurant] = useState(true);
 
-const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 useEffect(() => {
-  const checkUserLogin = async () => {
-    const result = await checkLogin();
-    setIsLoggedIn(result);
-  };
+  if (!Userfront.accessToken) {
+    navigate('/login');
+  } else {
+  checkUserLogin(navigate);
+}}, []);
 
-  checkUserLogin();
-}, []);
-
-if (!Userfront.accessToken) {
-  return <Navigate to="/login" replace />
-} else {
-  if (!isLoggedIn) {
-    return <Navigate to="/login" replace />
-  }
-}
 
 useEffect(() => {
   if (redirectUrl) {
@@ -88,26 +84,36 @@ useEffect(() => {
 
   console.log(restaurantId);
 
+  const RedirectToRestaurant = () => {
+    useEffect(() => {
+      navigate('/dashboard/restaurant');
+    }, [navigate]);
+  
+    return null;
+  };
+
 
   return (
-    <div className="dashboard">
+    <>
       <StyledSidebar>
         <ul>
-          <li><StyledNavLink to="/dashboard/restaurant">Restaurant</StyledNavLink></li>
-          <li><StyledNavLink to="/dashboard/tables">Tables</StyledNavLink></li>
-          <li><StyledNavLink to="/dashboard/reservations">Reservations</StyledNavLink></li>
+          <li><StyledNavLink to="/dashboard/restaurant"><Button icon={<Restaurant />} hoverIndicator /><NavSpan>Restaurant</NavSpan></StyledNavLink></li>
+          <li><StyledNavLink to="/dashboard/tables"><Button icon={<Cafeteria />} hoverIndicator /><NavSpan>Tables</NavSpan></StyledNavLink></li>
+          <li><StyledNavLink to="/dashboard/reservations"><Button icon={<UserNew />} hoverIndicator /><NavSpan>Reservations</NavSpan></StyledNavLink></li>
+          <li><HorizontalContainer maxWidth="100px"><LogoutButton /></HorizontalContainer></li>
         </ul>
       </StyledSidebar>
       <MainContentWithSideBar>
         {!isLoadingRestaurant && (
           <Routes>
+            <Route path="/" element={<RedirectToRestaurant />} />
             <Route path="restaurant" element={<RestaurantTab />} />
             <Route path="tables" element={<TablesTab />} />
             <Route path="reservations" element={<ReservationsTab />} />
           </Routes>
         )}
       </MainContentWithSideBar>
-    </div>
+    </>
   );
 }
 

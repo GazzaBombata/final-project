@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { fetchReservations } from '../api/fetchReservations.js';
 import { deleteReservation } from '../api/deleteReservation.js';
-import { StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader  } from '../components/styles.js';
+import { StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader, SecondaryButton  } from '../components/styles.js';
 import { useSelector } from 'react-redux';
 import { format, parseISO } from 'date-fns';
 
@@ -54,7 +54,7 @@ const ReservationsTab = () => {
               <StyledTableCell>{reservation.Status}</StyledTableCell>
               <StyledTableCell>{reservation.Table.TableNumber}</StyledTableCell>
               <StyledTableCell>
-                <button onClick={() => handleDelete(reservation.ReservationID)}>Delete</button>
+                <SecondaryButton onClick={() => handleDelete(reservation.ReservationID)}>Delete</SecondaryButton>
               </StyledTableCell>
             </StyledTableRow>
           ))}

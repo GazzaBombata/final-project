@@ -4,6 +4,10 @@ Userfront.init("wn9vz89b");
 
 export const fetchRole = async () => {
 
+  if (!Userfront.tokens.accessToken) {
+    return null;
+  }
+
   let res;
 
   try {

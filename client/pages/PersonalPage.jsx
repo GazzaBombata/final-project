@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { fetchUserReservations } from '../api/fetchUserReservations.js';
 import { deleteReservation } from '../api/deleteReservation.js';
-import { StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader  } from '../components/styles.js';
+import { StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader, SecondaryButton, HorizontalContainer  } from '../components/styles.js';
 import { useSelector } from 'react-redux';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -10,30 +10,26 @@ import Userfront from "@userfront/core";
 import { Navigate } from 'react-router-dom';
 import { checkLogin } from '../api/checkLogin.js';
 import { useEffect } from 'react';
+import { checkUserLogin } from '../api/checkUserLogin.js';
+import LogoutButton from "../components/LogoutButton";
+import useRedirect from '../functions-hooks/useRedirect.js';
 
 Userfront.init("wn9vz89b");
 
 
 const PersonalPage = () => {
-  
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  const redirectUrl = useSelector(state => state.redirect.redirectUrl);
+
+  const navigate = useNavigate();
+  
   useEffect(() => {
-    const checkUserLogin = async () => {
-      const result = await checkLogin();
-      setIsLoggedIn(result);
-    };
-  
-    checkUserLogin();
-  }, []);
+    if (!Userfront.accessToken) {
+      navigate('/login');
+    } else {
+    checkUserLogin(navigate);
+  }}, []);
 
-  if (!Userfront.accessToken) {
-    return <Navigate to="/login" replace />
-  } else {
-    if (!isLoggedIn) {
-      return <Navigate to="/login" replace />
-    }
-  }
 
 
   const queryClient = useQueryClient();
@@ -58,7 +54,10 @@ const PersonalPage = () => {
 
   return (
     <div>
+      <HorizontalContainer>
       <h1>Reservations</h1>
+      <HorizontalContainer maxWidth="100px"><LogoutButton /></HorizontalContainer>
+      </HorizontalContainer>
 
       <StyledTable>
       <StyledTableHeader>
@@ -80,7 +79,7 @@ const PersonalPage = () => {
               <StyledTableCell>{reservation.Status}</StyledTableCell>
               <StyledTableCell>{reservation.Table.TableNumber}</StyledTableCell>
               <StyledTableCell>
-                <button onClick={() => handleDelete(reservation.ReservationID)}>Delete</button>
+                <SecondaryButton onClick={() => handleDelete(reservation.ReservationID)}>Delete</SecondaryButton>
               </StyledTableCell>
             </StyledTableRow>
           ))}
