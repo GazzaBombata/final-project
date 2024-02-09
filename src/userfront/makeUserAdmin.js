@@ -1,5 +1,8 @@
 export async function makeUserAdmin(userId) {
 
+  console.log('makeUserAdmin called')
+  console.log(userId)
+
 const payload = {
   roles: [
     "owner"
@@ -16,6 +19,8 @@ const response = await fetch(`https://api.userfront.com/v0/tenants/wn9vz89b/user
 });
 
 const responseData = await response.json();
+
+console.log(responseData);
 
 return responseData
 

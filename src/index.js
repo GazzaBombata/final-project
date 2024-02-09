@@ -7,6 +7,7 @@ import dotenv from 'dotenv';
 import { createPublicKey } from 'crypto';
 import multer from 'multer';
 import { uploadImage } from './functions/uploadImage';
+import  { makeUserAdmin } from './userfront/makeUserAdmin';
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ app.use(cors());
 
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
+  console.log(req.body);
+  console.log(req.headers.authorization)
   next();
 });
 
@@ -61,6 +64,7 @@ const verifyJwt = async (req, res, next) => {
         console.log(err)
         res.status(403).json({ message: 'Expired token' });
       }
+      console.log('The token is valid')
 
       next();
     } catch (err) {
@@ -78,7 +82,6 @@ const verifyJwt = async (req, res, next) => {
 
 app.get('/v1/check-login', verifyJwt, (req, res) => {
   // If the JWT is valid and not expired, req.user will contain the decoded token
-  console.log(req.user);
   res.json({ message: 'Token is valid', user: req.user });
 });
 
@@ -110,13 +113,11 @@ app.put('/v1/users/:id',  verifyJwt,  async (req, res) => {
   }
 });
 
-app.put('/v1/users/roles/:id', verifyJwt, async (req, res) => {
-
+app.post('/v1/make-admin', verifyJwt, async (req, res) => {
+  console.log('make admin')
   try {
-    const user = await User.makeAdmin(req.user.userId);
-    console.log(user)
+    const user = await makeUserAdmin(req.user.userId);
     if (user) {
-      console.log(user)
       res.json(user);
     } else {
       res.status(404).json({ message: 'User not found' }); // Not Found
@@ -128,9 +129,13 @@ app.put('/v1/users/roles/:id', verifyJwt, async (req, res) => {
 });
 
 app.get('/v1/check-role', verifyJwt, async (req, res) => {
-  try {
+  console.log(req.user)
+  if (req.user.authorization.wn9vz89b) {
+    try {
+    
     const role = req.user.authorization.wn9vz89b.roles[0];
     if (role === 'owner') {
+      console.log('role is owner')
       res.json({ isOwner: true });
     } else {
       res.json({ isOwner: false });
@@ -138,6 +143,9 @@ app.get('/v1/check-role', verifyJwt, async (req, res) => {
   } catch (error) {
     console.log(error)
     res.status(500).json({ message: 'Internal Server Error' }); // Internal Server Error
+  }
+  } else {
+    res.json({ isOwner: false });
   }
 });
 

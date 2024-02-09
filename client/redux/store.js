@@ -17,7 +17,7 @@ const restaurantSlice = createSlice({
       state.restaurantId = action.payload;
     },
     [RESET]: (state, action) => {
-      return { restaurantId: null };
+      state.restaurantId = null;
     },
   },
 });
@@ -30,7 +30,7 @@ const redirectSlice = createSlice({
       state.redirectUrl = action.payload;
     },
     [RESET]: (state, action) => {
-      return { redirectUrl: null };
+      state.redirectUrl = null;
     },
   },
 });
@@ -48,8 +48,18 @@ const dateSlice = createSlice({
       }
     },
     [RESET]: (state, action) => {
-      return { justDate: null, dateTime: null };
+      state.justDate = null;
+      state.dateTime = null;
     },
+  },
+});
+
+const makeUserAdminSlice = createSlice({
+  name: 'makeUserAdmin',
+  initialState: false,
+  reducers: {
+    setMakeUserAdmin: (state, action) => action.payload,
+    RESET: state => false,
   },
 });
 
@@ -57,6 +67,7 @@ const rootReducer = combineReducers({
   restaurant: restaurantSlice.reducer,
   redirect: redirectSlice.reducer,
   date: dateSlice.reducer,
+  makeUserAdmin: makeUserAdminSlice.reducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -76,6 +87,7 @@ const store = configureStore({
 export const { setRestaurantId } = restaurantSlice.actions;
 export const { setRedirectUrl } = redirectSlice.actions;
 export const { setDate } = dateSlice.actions;
+export const { setMakeUserAdmin } = makeUserAdminSlice.actions;
 
 export const persistor = persistStore(store);
 export default store;

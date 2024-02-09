@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import { NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 
 export const CenteredSection = styled.section`
@@ -21,7 +22,6 @@ export const LeftAlignSection = styled.section`
 `;
 
 export const NavSpan = styled.span`
-  color: red;
   @media (max-width: 600px) {
     display: none;
   }
@@ -44,6 +44,7 @@ export const HorizontalContainer = styled.div`
   justify-content: space-between;
   max-width: ${props => props.maxWidth || 'none'};
   min-width: ${props => props.minWidth || 'none'};
+  max-height: 100%;
   width: ${props => (props.fitContent ? 'fit-content' : 'auto')};
   flex-wrap: ${props => (props.wrap ? 'wrap' : 'auto')};
 
@@ -71,11 +72,24 @@ export const StyledH1 = styled.h1`
   color: #000000;
 `;
 
+export const StyledWhiteH1 = styled.h1`
+  font-size: 2em;
+  font-family: 'Playfair Display', serif;
+  color: white;
+`;
+
 export const StyledH2 = styled.h2`
   font-size: 1.5em;
   font-family: 'Playfair Display', serif;
   color: #000000;
 `;
+
+export const StyledWhiteH2 = styled.h2`
+  font-size: 1.5em;
+  font-family: 'Playfair Display', serif;
+  color: white;
+`;
+
 
 export const StyledH3 = styled.h3`
   font-size: 1.17em;
@@ -104,8 +118,15 @@ export const StyledH6 = styled.h6`
 export const CenteredP = styled.p`
   font-size: 1em;
   text-align: center;
-  font-family: 'Playfair Display', serif;
+  font-family: 'Libre Franklin', sans-serif;
   color: #000000;
+`;
+
+export const CenteredWhiteP = styled.p`
+  font-size: 1em;
+  text-align: center;
+  font-family: 'Libre Franklin', sans-serif;
+  color: white;
 `;
 
 export const LeftAlignP = styled.p`
@@ -166,6 +187,27 @@ export const SecondaryButton = styled.button`
   margin: ${props => props.margin || 'none'};
   background-color: #4f545c;
   transition: background-color .17s ease,color .17s ease;
+                
+`;
+
+export const SecondaryLink = styled(Link)`
+
+  display: inline-block;
+  outline: none;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 5px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  margin: 10px 0px;
+  width: fit-content;
+  height: fit-content;
+  border: none;
+  color: #fff;
+  background-color: #4f545c;
+  transition: background-color .17s ease,color .17s ease;
+  font-family: 'Libre Franklin', sans-serif;
                 
 `;
 
@@ -345,5 +387,85 @@ export const DetailBox = styled.div`
   border: 1px solid #ccc;
   border-radius: 5px;
   padding: 10px;
+`;
+
+export const StyledHorizontalLeftAlignContainer = styled(HorizontalLeftAlignContainer)`
+  flex-wrap: wrap;
+  width: 100%;
+`;
+
+export const StyledImage = styled.img`
+  max-height: 100vh;
+  width: auto;
+`;
+
+export const StyledHorizontalContainer = styled(HorizontalContainer)`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const Main = styled.main`
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+width: 100%;
+`;
+
+export const FinalSection = styled.section`
+padding: 50px;
+text-align: center;
+max-width: 800px;
+& > * {
+  margin: 10px 0;
+}
+`;
+
+export const Benefit = styled.div`
+width: 200px;
+margin: 20px;
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+& > * {
+  margin: 5px 0;
+}
+`;
+
+export const HeroSection = styled.section`
+  color: white;
+  padding: 50px;
+  text-align: center;
+  position: relative;
+  background-color: rgba(0,0,0,0.5);
+  width: 100%;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image: url('https://images.unsplash.com/photo-1551632436-cbf8dd35adfa?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-size: cover;
+    background-position: center;
+    background-color: black;
+    z-index: -1;
+  }
+`;
+
+export const BenefitsSection = styled.section`
+  background-color: white;
+  padding: 50px;
+  text-align: center;
+`;
+
+export const BenefitsContainer = styled.div`
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
 `;
 // Add more styled components as needed

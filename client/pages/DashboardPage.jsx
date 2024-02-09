@@ -10,73 +10,91 @@ import { StyledSidebar, MainContentWithSideBar, StyledNavLink, NavSpan, Horizont
 import { useDispatch, useSelector } from 'react-redux';
 import { setRestaurantId } from '../redux/store.js';
 import { fetchRestaurantForUser } from '../api/fetchRestaurantForUser.js';
-import useRedirect from '../functions-hooks/useRedirect.js';
+import redirectFunction from '../functions-hooks/redirectFunction.js';
 import Userfront from "@userfront/core";
 import { useNavigate } from 'react-router-dom';
 import { checkUserLogin } from '../api/checkUserLogin.js';
 import { Sidebar, Grommet, Avatar, Button, Nav, Main } from 'grommet';
 import { Cafeteria, Restaurant, UserNew } from 'grommet-icons';
 import LogoutButton from "../components/LogoutButton";
+import { makeAdmin } from '../api/makeAdmin.js';
+
 
 Userfront.init("wn9vz89b");
 
 function DashboardPage() {
 
 const navigate = useNavigate();
+const dispatch = useDispatch();
 
 const redirectUrl = useSelector(state => state.redirect.redirectUrl);
 
 const [isLoadingRestaurant, setIsLoadingRestaurant] = useState(true);
-
-
-useEffect(() => {
-  if (!Userfront.accessToken) {
-    navigate('/login');
-  } else {
-  checkUserLogin(navigate);
-}}, []);
-
-
-useEffect(() => {
-  if (redirectUrl) {
-    console.log(redirectUrl);
-  }
-}, [redirectUrl]);
-
-useRedirect();
-
-const { data, status } = useQuery('role', fetchRole, {
-  refetchOnWindowFocus: false,
-  refetchOnReconnect: false,
-});
-
-const isOwner = data?.isOwner;
-const isLoading = status === 'loading';
-
-const dispatch = useDispatch();
+const [isMakingAdmin, setIsMakingAdmin] = useState(false);
+const makeUserAdmin = useSelector(state => state.makeUserAdmin);
 const restaurantId = useSelector(state => state.restaurant.restaurantId);
 
-useEffect(() => {
-  fetchRestaurantForUser().then((data) => {
+
+const [shouldFetch, setShouldFetch] = useState(false);
+// Fetch role
+
+
+const performOperations = async () => {
+  if (redirectUrl) {
+    console.log(redirectUrl);
+    redirectFunction(redirectUrl, navigate);
+    return;
+  }
+
+  if (!Userfront.tokens.accessToken) {
+    navigate('/login');
+    return;
+  }
+
+  await checkUserLogin(navigate, dispatch);
+
+  const data = await fetchRole()
+  .then(async (data) => {
     console.log(data);
-    if (data) {
-      console.log(data.RestaurantID);
-      dispatch(setRestaurantId(data.RestaurantID));
-    };
-    // Set loading state to false after restaurantId is set
-    setIsLoadingRestaurant(false);
+    let owner = data.isOwner
+    if (!owner) {
+      if (makeUserAdmin && !isMakingAdmin) {
+        console.log('isOwner is false but makeUserAdmin is true');
+        setIsMakingAdmin(true);
+        const res = await makeAdmin();
+        console.log(res);
+        setIsMakingAdmin(true);
+        setShouldFetch(true); 
+        console.log('makeAdmin done');
+        owner = true;
+      } else {
+        navigate('/personal');
+      }
+    }
+    if (owner) {
+      console.log('owner is true');
+      fetchRestaurantForUser().then((data) => {
+        console.log(data);
+        if (data) {
+          console.log(data.RestaurantID);
+          dispatch(setRestaurantId(data.RestaurantID));
+        };
+        // Set loading state to false after restaurantId is set
+        setIsLoadingRestaurant(false);
   });
-}, [dispatch]);
-
-
-  if (isLoading) {
-    return null; // or return a loading indicator
+    }
   }
+  );
+};
 
-  if (!isOwner) {
-    alert('You are not the owner');
-    return <Navigate to="/login" replace />
-  }
+
+
+useEffect(() => {
+  performOperations();
+}, []);
+
+
+
 
   if (isLoadingRestaurant) {
     return <p>Loading...</p>; // or a loading indicator
@@ -107,7 +125,7 @@ useEffect(() => {
         {!isLoadingRestaurant && (
           <Routes>
             <Route path="/" element={<RedirectToRestaurant />} />
-            <Route path="restaurant" element={<RestaurantTab />} />
+            <Route path="restaurant" shouldFetch={shouldFetch} element={<RestaurantTab />} />
             <Route path="tables" element={<TablesTab />} />
             <Route path="reservations" element={<ReservationsTab />} />
           </Routes>

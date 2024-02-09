@@ -187,13 +187,6 @@ User.deleteItem = async (id) => {
   }
 };
 
-User.makeAdmin = async (userFrontUserId) => {
-  if (isNaN(userId)) {
-    throw new Error("id must be a number");
-  }
-  
-  return await makeUserAdmin(userFrontUserId);
-}
 
 User.prototype.getReservations = async function(startDate, endDate) {
   try {

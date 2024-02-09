@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CenteredSection, VerticalContainer, StyledH1, PrimaryButton, LeftAlignSection, StyledLabel, StyledInput, HorizontalContainer, StyledPopup  } from '../components/styles.js';
+import { CenteredSection, VerticalContainer, StyledH1, PrimaryButton, LeftAlignSection, StyledLabel, StyledInput, HorizontalContainer, StyledPopup, SecondaryLink  } from '../components/styles.js';
 import { fetchRestaurantForUser } from '../api/fetchRestaurantForUser.js'
 import { createRestaurant } from '../api/createRestaurant.js'
 import { updateRestaurant } from '../api/updateRestaurant.js'
@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { setRestaurantId } from '../redux/store.js';
 import { useQuery } from 'react-query';
 
-function RestaurantTab() {
+function RestaurantTab({ shouldFetch }) {
   
   const [formState, setFormState] = useState({
     Name: '',
@@ -26,6 +26,13 @@ const [originalPhotoUrls, setOriginalPhotoUrls] = useState({ CoverPhoto: null, P
 const [currentPhotos, setCurrentPhotos] = useState({ CoverPhoto: null, ProfilePhoto: null });
 const restaurantId = useSelector(state => state.restaurantId);
 const [isSubmitting, setIsSubmitting] = useState(false);
+const [showLink, setShowLink] = useState(null);
+console.log(restaurantId);
+console.log(showLink);
+
+useEffect(() => {
+  setShowLink(restaurantId);
+}, [restaurantId]);
 
 
 const dispatch = useDispatch();
@@ -35,7 +42,15 @@ const fetchRestaurantData = async () => {
   return restaurantData;
 };
 
-const { data: restaurantData, isLoading, isError } = useQuery('restaurantData', fetchRestaurantData);
+const { data: restaurantData, isLoading, isError } = useQuery('restaurantData', fetchRestaurantData, {
+  enabled: shouldFetch, // Only fetch when shouldFetch is true
+  onSuccess: (data) => {
+    // This function will be called every time the query successfully fetches data
+    setShowLink(data.RestaurantID);
+    dispatch(setRestaurantId(data.RestaurantID));
+  },
+});
+
   
 useEffect(() => {
   if (restaurantData) {
@@ -102,6 +117,7 @@ const handleSubmit = async (event) => {
       console.log('updating restaurant')
       console.log(restaurantId, restaurantData);
       const updatedRestaurant = await updateRestaurant(restaurantId, restaurantData);
+      setShowLink(updateRestaurant.RestaurantID);
 
       console.log(updatedRestaurant);
 
@@ -114,6 +130,7 @@ const handleSubmit = async (event) => {
       const newRestaurant = await createRestaurant(restaurantData);
       dispatch(setRestaurantId(newRestaurant.RestaurantID));
       console.log(newRestaurant);
+      setShowLink(newRestaurant.RestaurantID);
       alert('Restaurant created successfully!');
     }
   } catch (error) {
@@ -165,8 +182,8 @@ return (
       </div>
     </StyledPopup>
   )}
-  {restaurantId && (
-    <Link to={`/reserve/${restaurantId}`}>Go to Reservation Page</Link>
+  {showLink && (
+    <SecondaryLink to={`/reserve/${showLink}`}>Visit</SecondaryLink>
   )}
   </>
 );

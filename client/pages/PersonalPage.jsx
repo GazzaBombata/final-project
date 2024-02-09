@@ -12,22 +12,30 @@ import { checkLogin } from '../api/checkLogin.js';
 import { useEffect } from 'react';
 import { checkUserLogin } from '../api/checkUserLogin.js';
 import LogoutButton from "../components/LogoutButton";
-import useRedirect from '../functions-hooks/useRedirect.js';
+import { setRedirectUrl } from '../redux/store.js';
+import { useDispatch } from 'react-redux';
 
 Userfront.init("wn9vz89b");
 
 
 const PersonalPage = () => {
+  console.log('Rendering PersonalPage');
 
   const redirectUrl = useSelector(state => state.redirect.redirectUrl);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   
   useEffect(() => {
-    if (!Userfront.accessToken) {
+    if (!Userfront.tokens.accessToken) {
+      dispatch(setRedirectUrl(window.location.href));
+      alert('You need to login to view your pages, we will redirect you to login / signup page.');
       navigate('/login');
     } else {
-    checkUserLogin(navigate);
+    checkUserLogin(navigate, dispatch).then(() => {
+      setIsUserLoggedIn(true); 
+    });
   }}, []);
 
 
@@ -35,7 +43,12 @@ const PersonalPage = () => {
   const queryClient = useQueryClient();
   const [validationError, setValidationError] = useState(false);
 
-  const { data: reservations, isLoading, isError } = useQuery(['reservations'], () => fetchUserReservations());
+  // const { data: reservations, isLoading, isError } = useQuery(['reservations'], () => fetchUserReservations());
+  const { data: reservations, isLoading, isError } = useQuery(
+    ['reservations'], 
+    () => fetchUserReservations(), 
+    { enabled: isUserLoggedIn } // only fetch data if user is logged in
+  );
 
   const mutationOnDelete = useMutation(deleteReservation, {
     onSuccess: () => {
@@ -51,6 +64,10 @@ const PersonalPage = () => {
 
   if (isLoading) return 'Loading...';
   if (isError) return 'An error occurred';
+
+  if (!isUserLoggedIn) {
+    return null; // or return some loading state
+  }
 
   return (
     <div>
