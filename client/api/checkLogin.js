@@ -1,6 +1,6 @@
 import Userfront from "@userfront/core";
 
-Userfront.init("wn9vz89b");
+Userfront.init('wn9vz89b');
 
 export const checkLogin = async () => {
 
@@ -11,7 +11,7 @@ export const checkLogin = async () => {
   }
 
   try {
-    res = await fetch('http://localhost:8080/v1/check-login', {
+    res = await fetch('/v1/check-login', {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
       },

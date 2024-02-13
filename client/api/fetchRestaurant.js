@@ -7,21 +7,26 @@ export const fetchRestaurant = async (id) => {
   let res;
 
   try {
-    res = await fetch(`http://localhost:8080/v1/restaurants/${id}`, {
+    res = await fetch(`/v1/restaurants/${id}`, {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
       },
     });
 
-    console.log(res);
+    if (res.status === 404) {
+      throw new Error('Restaurant not found');
+    }
+
 
     if (!res.ok) {
-      throw new Error('Network response was not ok');
+      throw new Error('Network response not ok');
     }
-  } catch (error) {
-    console.log(error);
-  }
 
+  } catch (error) {
+    
+    console.log(error);
+    throw error;
+  }
   const data = await res.json();
 
   return data;

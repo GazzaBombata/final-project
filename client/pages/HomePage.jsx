@@ -1,22 +1,24 @@
 import React from 'react';
-import { CenteredSection, BenefitsSection, BenefitsContainer, Benefit, HeroSection, PrimaryButton, StyledWhiteH1, StyledH2, CenteredWhiteP, CenteredP, FinalSection, Main, StyledH3 } from '../components/styles.js';
+import { BenefitsSection, BenefitsContainer, Benefit, HeroSection, PrimaryButton, StyledWhiteH1, StyledH2, CenteredWhiteP, CenteredP, FinalSection, Main, StyledH3 } from '../components/styles.js';
 import { View, Money, Snapchat, UserManager} from 'grommet-icons';
 import { useDispatch } from 'react-redux';
 import { useNavigate} from 'react-router-dom';
 import { setMakeUserAdmin } from '../redux/store.js';
+import Head from '../components/Head.jsx';
 
 const HomePage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   function handleClick() {
-    console.log('click');
     dispatch(setMakeUserAdmin(true));
     navigate('/signup');
   }
 
 
   return (
+    <>
+    <Head title="Tablebooks" description="Tablebooks simplifies table reservations for restaurant orders." siteContent="Tablebooks, restaurant reservations made simple"/>
     <Main>
       <HeroSection>
         <StyledWhiteH1>Are you ready to get more customers?</StyledWhiteH1>
@@ -57,6 +59,7 @@ const HomePage = () => {
         <PrimaryButton to="/signup" onClick={handleClick}>Begin</PrimaryButton>
       </FinalSection>
     </Main>
+    </>
   );
 };
 

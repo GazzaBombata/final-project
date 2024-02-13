@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { fetchReservations } from '../api/fetchReservations.js';
 import { deleteReservation } from '../api/deleteReservation.js';
-import { StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader, SecondaryButton  } from '../components/styles.js';
+import { StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader, SecondaryButton } from '../components/styles.js';
 import { useSelector } from 'react-redux';
 import { format, parseISO } from 'date-fns';
+import Head from '../components/Head.jsx';
+
 
 
 const ReservationsTab = () => {
@@ -14,6 +16,7 @@ const ReservationsTab = () => {
   const [validationError, setValidationError] = useState(false);
 
   const { data: reservations, isLoading, isError } = useQuery(['reservations', restaurantId], () => fetchReservations(restaurantId));
+  
 
   const mutationOnDelete = useMutation(deleteReservation, {
     onSuccess: () => {
@@ -23,7 +26,7 @@ const ReservationsTab = () => {
   });
 
   const handleDelete = (ReservationID) => {
-    mutationOnDelete.mutate (ReservationID);
+    mutationOnDelete.mutate(ReservationID);
   };
 
 
@@ -31,36 +34,39 @@ const ReservationsTab = () => {
   if (isError) return 'An error occurred';
 
   return (
-    <div>
-      <h1>Reservations</h1>
+    <>
+      <Head title="Tablebooks - Manage your reservations" description="A page where a Restaurant Owner can view and manage his or her restaurant reservations" siteContent="Tablebooks, restaurant reservations made simple" />
+      <div>
+        <h1>Reservations</h1>
 
-      <StyledTable>
-      <StyledTableHeader>
-        <tr>
-          <th>Time</th>
-          <th>User</th>
-          <th>People</th>
-          <th>Status</th>
-          <th>Table Number</th>
-          <th>Actions</th>
-        </tr>
-      </StyledTableHeader>
-        <tbody>
-          {reservations.map((reservation) => (
-            <StyledTableRow key={reservation.ReservationID}>
-              <StyledTableCell>{format(parseISO(reservation.ReservationTime), 'dd/MM/yyyy HH:mm')}</StyledTableCell>
-              <StyledTableCell>{reservation.UserID}</StyledTableCell>
-              <StyledTableCell>{reservation.NumberOfPeople}</StyledTableCell>
-              <StyledTableCell>{reservation.Status}</StyledTableCell>
-              <StyledTableCell>{reservation.Table.TableNumber}</StyledTableCell>
-              <StyledTableCell>
-                <SecondaryButton onClick={() => handleDelete(reservation.ReservationID)}>Delete</SecondaryButton>
-              </StyledTableCell>
-            </StyledTableRow>
-          ))}
-        </tbody>
-      </StyledTable>
-    </div>
+        <StyledTable>
+          <StyledTableHeader>
+            <tr>
+              <th>Time</th>
+              <th>User</th>
+              <th>People</th>
+              <th>Status</th>
+              <th>Table #</th>
+              <th>Actions</th>
+            </tr>
+          </StyledTableHeader>
+          <tbody>
+            {reservations.map((reservation) => (
+              <StyledTableRow key={reservation.ReservationID}>
+                <StyledTableCell>{format(parseISO(reservation.ReservationTime), 'dd/MM/yyyy HH:mm')}</StyledTableCell>
+                <StyledTableCell>{reservation.UserID}</StyledTableCell>
+                <StyledTableCell>{reservation.NumberOfPeople}</StyledTableCell>
+                <StyledTableCell>{reservation.Status}</StyledTableCell>
+                <StyledTableCell>{reservation.Table.TableNumber}</StyledTableCell>
+                <StyledTableCell>
+                  <SecondaryButton onClick={() => handleDelete(reservation.ReservationID)}>Delete</SecondaryButton>
+                </StyledTableCell>
+              </StyledTableRow>
+            ))}
+          </tbody>
+        </StyledTable>
+      </div>
+    </>
   );
 };
 

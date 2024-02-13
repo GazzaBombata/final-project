@@ -6,8 +6,10 @@ export const createRestaurant = async (restaurant) => {
 
   let res;
 
+  console.log(restaurant);
+
   try {
-    res = await fetch('http://localhost:8080/v1/restaurants', {
+    res = await fetch('/v1/restaurants', {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
         'Content-Type': 'application/json',

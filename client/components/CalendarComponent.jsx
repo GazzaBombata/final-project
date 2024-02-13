@@ -139,6 +139,9 @@ function CalendarComponent() {
               if (e.target.value >= 1) {
                 setPartySize(e.target.value);
               }
+              if (date.justDate) {
+                getTimes();
+              }
             }}  />
         </VerticalContainer>
       </StyledLabel>

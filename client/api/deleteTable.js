@@ -8,7 +8,7 @@ export const deleteTable = async (tableID) => {
 
   try {
     
-    res = await fetch(`http://localhost:8080/v1/tables/${tableID}`, {
+    res = await fetch(`/v1/tables/${tableID}`, {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
       },

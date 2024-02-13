@@ -22,9 +22,7 @@ export const LeftAlignSection = styled.section`
 `;
 
 export const NavSpan = styled.span`
-  @media (max-width: 600px) {
-    display: none;
-  }
+
 `;
 
 export const VerticalContainer = styled.div`
@@ -34,6 +32,12 @@ export const VerticalContainer = styled.div`
   gap: ${props => props.$gap || '0px'};
   max-width: ${props => props.$maxWidth || 'none'};
   width: ${props => (props.$fitContent ? 'fit-content' : 'auto')};
+
+  @media (max-width: 768px) {
+    align-items: center;
+    max-width: 100%;
+    width: 100%;
+  }
 `;
 
 export const HorizontalContainer = styled.div`
@@ -63,6 +67,27 @@ export const HorizontalLeftAlignContainer = styled.div`
   min-width: ${props => props.minWidth || 'none'};
   width: ${props => (props.fitContent ? 'fit-content' : 'auto')};
   flex-wrap: ${props => (props.wrap ? 'wrap' : 'auto')};
+`;
+
+export const WrappableHorizontalLeftAlignContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: ${props => props.align || 'center'};
+  gap: 10px;
+  justify-content: flex-start;
+  max-width: ${props => props.maxWidth || 'none'};
+  min-width: ${props => props.minWidth || 'none'};
+  width: ${props => (props.fitContent ? 'fit-content' : 'auto')};
+  flex-wrap: ${props => (props.wrap ? 'wrap' : 'auto')};
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    align-items: center;
+    justify-content: center;
+  }
 `;
 
 
@@ -214,6 +239,7 @@ export const SecondaryLink = styled(Link)`
 export const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
+  max-width: 100%
 `;
 
 export const StyledTableRow = styled.tr`
@@ -237,7 +263,7 @@ export const StyledTableHeader = styled.thead`
 export const StyledSidebar = styled.aside`
   position: fixed;
   width: auto;
-  max-width: 150;
+  max-width: 200px;
   height: 100%;
   left: 0;
   top: 0;
@@ -246,6 +272,13 @@ export const StyledSidebar = styled.aside`
   overflow: auto;
   font-family: 'Libre Franklin', sans-serif;
   color: #333;
+  transform: ${({ isOpen }) => (isOpen ? 'translateX(0)' : 'translateX(-100%)')};
+  transition: transform 0.3s ease-in-out;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    max-width: 100%;
+  }
 
   ul {
     list-style-type: none;
@@ -285,6 +318,10 @@ export const StyledNavLink = styled(NavLink)`
 export const MainContentWithSideBar = styled.div`
   margin-left: 210px;
   max-width: 800px;
+  @media (max-width: 768px) {
+    width: 100%;
+    margin-left: 0;
+  }
 `;
 
 export const StyledLabel = styled.label`

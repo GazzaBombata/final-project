@@ -3,8 +3,10 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { createTable } from '../api/createTable.js';
 import { deleteTable } from '../api/deleteTable.js';
 import { fetchTables } from '../api/fetchTables.js';
-import { CenteredSection, VerticalContainer, StyledH1, PrimaryButton, LeftAlignSection, StyledLabel, StyledInput, HorizontalContainer, StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader, SecondaryButton  } from '../components/styles.js';
-import {  useSelector } from 'react-redux';
+import { VerticalContainer, PrimaryButton, StyledLabel, StyledInput, HorizontalContainer, StyledTable, StyledTableRow, StyledTableCell, StyledTableHeader, SecondaryButton } from '../components/styles.js';
+import { useSelector } from 'react-redux';
+import Head from '../components/Head.jsx';
+
 
 
 const TablesTab = () => {
@@ -12,13 +14,13 @@ const TablesTab = () => {
   const [showPopup, setShowPopup] = useState(false);
   const restaurantId = useSelector(state => state.restaurant.restaurantId);
   const [validationError, setValidationError] = useState(false);
-  
+
   const initialFormState = {
     CapacityMin: '',
     CapacityMax: '',
     TableNumber: '',
   };
-  
+
   // Use the initial form state when creating the formState state variable
   const [formState, setFormState] = useState(initialFormState);
 
@@ -52,7 +54,7 @@ const TablesTab = () => {
   });
 
   const handleDelete = (tableId) => {
-    mutationOnDelete.mutate (tableId);
+    mutationOnDelete.mutate(tableId);
   };
 
   const handleAdd = () => {
@@ -73,7 +75,7 @@ const TablesTab = () => {
       alert("A table with this number already exists.");
       return;
     }
-  
+
     setValidationError(false);
     mutationOnCreation.mutate({ restaurantId, formState });
   };
@@ -86,24 +88,27 @@ const TablesTab = () => {
   if (isError) return 'An error occurred';
 
   return (
-    <div>
-      <h1>Tables <button onClick={handleAdd}>Add</button></h1>
+    <>
+      <Head title="Tablebooks - Manage your tables" description="A page where a Restaurant Owner can mview and manage his or her restaurant tables" siteContent="Tablebooks, restaurant reservations made simple" />
 
-      {showPopup && (
-        <div className="popup">
-          <button onClick={handleClose}>Close</button>
-          {/* <div>Popup content goes here</div> */}
+      <div>
+        <h1>Tables <button onClick={handleAdd}>Add</button></h1>
+
+        {showPopup && (
+          <div className="popup">
+            <button onClick={handleClose}>Close</button>
+            {/* <div>Popup content goes here</div> */}
             <form onSubmit={handleSubmit}>
               <VerticalContainer $fitContent={true} $maxWidth={"800px"}>
                 {['CapacityMin', 'CapacityMax', 'TableNumber'].map((key) => (
                   <HorizontalContainer key={key}>
                     <StyledLabel htmlFor={key}>{key}</StyledLabel>
-                    <StyledInput 
-                      type="number" 
-                      id={key} 
-                      name={key} 
-                      value={formState[key]} 
-                      onChange={handleChange} 
+                    <StyledInput
+                      type="number"
+                      id={key}
+                      name={key}
+                      value={formState[key]}
+                      onChange={handleChange}
                       isError={key === 'CapacityMax' && validationError}
                     />
                   </HorizontalContainer>
@@ -113,34 +118,35 @@ const TablesTab = () => {
                 </HorizontalContainer>
               </VerticalContainer>
             </form>
-        </div>
-      )}
+          </div>
+        )}
 
-      <StyledTable>
-      <StyledTableHeader>
-        <tr>
-          <th>Table Number</th>
-          <th>Capacity Min</th>
-          <th>Capacity Max</th>
-          <th>Quantity</th>
-          <th>Actions</th>
-        </tr>
-      </StyledTableHeader>
-        <tbody>
-          {tables.map((table) => (
-            <StyledTableRow key={table.TableID}>
-              <StyledTableCell>{table.TableNumber}</StyledTableCell>
-              <StyledTableCell>{table.CapacityMin}</StyledTableCell>
-              <StyledTableCell>{table.CapacityMax}</StyledTableCell>
-              <StyledTableCell>{table.Quantity}</StyledTableCell>
-              <StyledTableCell>
-                <SecondaryButton onClick={() => handleDelete(table.TableID)}>Delete</SecondaryButton>
-              </StyledTableCell>
-            </StyledTableRow>
-          ))}
-        </tbody>
-      </StyledTable>
-    </div>
+        <StyledTable>
+          <StyledTableHeader>
+            <tr>
+              <th>Table Number</th>
+              <th>Capacity Min</th>
+              <th>Capacity Max</th>
+              <th>Quantity</th>
+              <th>Actions</th>
+            </tr>
+          </StyledTableHeader>
+          <tbody>
+            {tables.map((table) => (
+              <StyledTableRow key={table.TableID}>
+                <StyledTableCell>{table.TableNumber}</StyledTableCell>
+                <StyledTableCell>{table.CapacityMin}</StyledTableCell>
+                <StyledTableCell>{table.CapacityMax}</StyledTableCell>
+                <StyledTableCell>{table.Quantity}</StyledTableCell>
+                <StyledTableCell>
+                  <SecondaryButton onClick={() => handleDelete(table.TableID)}>Delete</SecondaryButton>
+                </StyledTableCell>
+              </StyledTableRow>
+            ))}
+          </tbody>
+        </StyledTable>
+      </div>
+    </>
   );
 };
 

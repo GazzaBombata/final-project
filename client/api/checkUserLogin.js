@@ -11,7 +11,6 @@ export const checkUserLogin = async (navigate, dispatch) => {
   const result = await checkLogin();
   if (!result) {
     if(dispatch && window.location.pathname !== "/login") {
-      console.log(window.location.pathname);
       dispatch(setRedirectUrl(window.location.href));
       alert('You need to login to view your pages, we will redirect you to login / signup page.');
     }

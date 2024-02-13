@@ -9,7 +9,7 @@ export const createTable = async ({ restaurantId, formState} ) => {
   try {
     formState.RestaurantID = restaurantId,
     
-    res = await fetch('http://localhost:8080/v1/tables', {
+    res = await fetch('/v1/tables', {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
         'Content-Type': 'application/json',

@@ -7,7 +7,7 @@ export const uploadRestaurantPhotos = async (file, name) => {
   formData.append('image', file, name);
 
   try {
-    const res = await fetch('http://localhost:8080/v1/upload', {
+    const res = await fetch('/v1/upload', {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
       },

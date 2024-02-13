@@ -11,7 +11,7 @@ export const makeAdmin = async () => {
   let res;
 
   try {
-    res = await fetch('http://localhost:8080/v1/make-admin', {
+    res = await fetch('/v1/make-admin', {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
         'Content-Type': 'application/json'
@@ -32,8 +32,6 @@ export const makeAdmin = async () => {
     console.log(error);
   }
   const data = await res.json();
-  console.log('response from makeAdmin')
-  console.log(data);
 
   return data;
 };

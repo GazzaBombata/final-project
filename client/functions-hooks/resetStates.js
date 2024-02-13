@@ -8,7 +8,6 @@ function resetStates() {
   // Purge the persisted state
   persistor.purge();
 
-  console.log('States reset');
 }
 
 // Export the function

@@ -79,11 +79,9 @@ User.createItem = async (item) => {
     item.UserfrontUserId = response.userId;
     delete item.Password;
     delete item.Name;
-    console.log('starting sequelize')
-    console.log(item)
     return await User.create(item);
   } catch (error) {
-    conxole.log(error)
+    console.log(error)
     throw error;
   }
 };
@@ -211,8 +209,6 @@ User.prototype.getReservations = async function(startDate, endDate) {
 
 // Restaurant CRUD operations
 Restaurant.createItem = async (owner, item) => {
-  console.log('starting createItem')
-  console.log(owner)
   try {
 
     const user = await User.findOne({
@@ -222,7 +218,6 @@ Restaurant.createItem = async (owner, item) => {
     });
 
     if (!user) {
-      console.log('user not found')
       return res.status(404).json({ message: 'User not found' });
     }
     console.log(user)
@@ -245,11 +240,12 @@ Restaurant.readItem = async (id) => {
     const restaurant = await Restaurant.findByPk(id);
     
     if (!restaurant) {
-      throw new Error("restaurant not found");
+      throw new Error("Restaurant not found");
     }
     
     return restaurant;
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -266,27 +262,6 @@ Restaurant.updateItem = async (id, item) => {
       throw new Error("restaurant not found");
     }
 
-    // if (!item.profilePhoto) {
-    //   try {
-    //     const file = item.profilePhoto;
-    //     const imageUrl = await uploadImage(file);
-    //     item.CoverPhoto = imageUrl;
-    //   } catch (error) {
-    //     console.log(error);
-    //     throw error;
-    //   }
-    // }
-
-    // if (!item.coverPhoto) {
-    //   try {
-    //     const file = item.coverPhoto;
-    //     const imageUrl = await uploadImage(file);
-    //     item.CoverPhoto = imageUrl;
-    //   } catch (error) {
-    //     console.log(error);
-    //     throw error;
-    //   }
-    // }
     
     return await Restaurant.update(item, { where: { RestaurantID: id } });
   } catch (error) {
@@ -308,6 +283,7 @@ Restaurant.deleteItem = async (id) => {
     
     return await Restaurant.destroy({ where: { RestaurantID: id } });
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -333,6 +309,7 @@ Table.createItem = async (owner, item) => {
 
     return await Table.create(item);
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -351,6 +328,7 @@ Table.readItem = async (id) => {
     
     return table;
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -369,6 +347,7 @@ Table.updateItem = async (id, item) => {
     
     return await Table.update(item, { where: { TableID: id } });
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -387,6 +366,7 @@ Table.deleteItem = async (id) => {
     
     return await Table.destroy({ where: { TableID: id } });
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -413,6 +393,7 @@ Reservation.createItem = async (guest, item) => {
 
     return await Reservation.create(item);
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -431,6 +412,7 @@ Reservation.readItem = async (id) => {
     
     return reservation;
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -449,6 +431,7 @@ Reservation.updateItem = async (id, item) => {
     
     return await Reservation.update(item, { where: { ReservationID: id } });
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -467,6 +450,7 @@ Reservation.deleteItem = async (id) => {
     
     return await Reservation.destroy({ where: { ReservationID: id } });
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -491,6 +475,7 @@ Restaurant.prototype.getReservations = async function(startDate, endDate) {
       include: Table
     });
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -510,6 +495,7 @@ Restaurant.prototype.getTables = async function() {
 
       return tables;
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
@@ -528,15 +514,11 @@ Restaurant.findAvailableSlots = async function(restaurantId, date, partySize) {
 
     let startDate = new Date(formattedDate);
     startDate.setHours(openingTime.split(':')[0]);
-    console.log(startDate)
 
     let endDate = new Date(formattedDate);
     endDate.setHours(closingTime.split(':')[0]);
-    console.log(endDate)
 
     const reservations = await restaurant.getReservations(startDate, endDate);
-
-    console.log(reservations)
 
     // Generate all possible slots for the day
     let slots = [];
@@ -552,22 +534,17 @@ const tables = await restaurant.getTables();
 
 // Filter out slots that conflict with existing reservations
 const availableSlots = slots.map(slot => {
-  console.log(`Checking slot at ${slot}`);
-  console.log(date)
   // Convert slot to a Date object for comparison
   const slotStartTime = new Date(`${formattedDate}T${slot}:00`);
   const slotEndTime = new Date(slotStartTime.getTime() + 30 * 60000); // Add 30 minutes
-  console.log(`Slot start time: ${slotStartTime}, slot end time: ${slotEndTime}`)
 
   // Check if slot overlaps with any reservation
   const conflictingReservations = reservations.filter(reservation => {
-    console.log(`Checking reservation at ${reservation.dataValues.ReservationTime}`)
     const reservationStartTime = reservation.dataValues.ReservationTime;
     const reservationEndTime = new Date(reservationStartTime.getTime() + 30 * 60000); // Assuming 30 minutes duration
   
     // Check for overlap
     const isOverlapping = slotStartTime < reservationEndTime && slotEndTime > reservationStartTime;
-    console.log(`Checking reservation at ${reservationStartTime}: overlaps with slot? ${isOverlapping}`);
     return isOverlapping;
   });
   
@@ -578,7 +555,6 @@ const availableSlots = slots.map(slot => {
   });
   
   const bookedTables = conflictingReservations.map(reservation => {
-    console.log(`Reservation at ${reservation.dataValues.ReservationTime} has booked table ID ${reservation.dataValues.TableID}`);
     return reservation.dataValues.Table;
   });
   
@@ -586,13 +562,9 @@ const availableSlots = slots.map(slot => {
     if (bookedTables.length === 0) {
       return true;
     }
-    console.log(table)
-    console.log(bookedTables)
     const isUnbooked = !bookedTables.some(bookedTable => bookedTable.dataValues.TableID === table.dataValues.TableID);
-    console.log(`Checking table ID ${table.dataValues.TableID}: is unbooked? ${isUnbooked}`);
     return isUnbooked;
   });
-  console.log(`Unbooked table IDs:`, unbookedTables.map(table => table.dataValues.TableID))
 
   // Return the slot time and the available table IDs
   return {
@@ -601,12 +573,10 @@ const availableSlots = slots.map(slot => {
   };
 }).filter(slotInfo => slotInfo.tableIds.length > 0);
 
-console.log(availableSlots)
-
 return availableSlots;
 
   } catch (error) {
-    console.error('Error querying available slots:', error);
+    console.log(error)
     throw error;
   }
 };
@@ -625,6 +595,7 @@ User.deleted = async function(record) {
   try {
     return await User.destroy({ where: { UserfrontUserId: record.userId } });
   } catch (error) {
+    console.log(error)
     throw error;
   }
 }

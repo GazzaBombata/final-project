@@ -11,15 +11,13 @@ export const fetchRole = async () => {
   let res;
 
   try {
-    res = await fetch('http://localhost:8080/v1/check-role', {
+    res = await fetch('/v1/check-role', {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
       },
     });
 
     const data = await res.json();
-    console.log('response from fetchRole')
-    console.log(data);
 
     if (!res.ok) {
       console.log(data);

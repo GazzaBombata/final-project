@@ -9,7 +9,7 @@ export const updateRestaurant = async (restaurantID, restaurant) => {
   try {
     restaurant.RestaurantID = restaurantID,
     
-    res = await fetch(`http://localhost:8080/v1/restaurants/${restaurantID}`, {
+    res = await fetch(`/v1/restaurants/${restaurantID}`, {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
         'Content-Type': 'application/json',

@@ -11,11 +11,10 @@ export const fetchAvailableSlots = async (restaurantId, date, partySize) => {
     partySize: partySize,
   };
 
-  console.log(body)
 
   try {
   
-    res = await fetch(`http://localhost:8080/v1/availableSlots`, {
+    res = await fetch(`/v1/availableSlots`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

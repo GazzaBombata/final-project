@@ -3,7 +3,6 @@ import Userfront from "@userfront/core";
 Userfront.init("wn9vz89b");
 
 export const createReservation = async (RestaurantID, date, slot, partySize, TableID) => {
-    console.log('createReservation', RestaurantID, date, slot, partySize, TableID);
 
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -23,7 +22,7 @@ export const createReservation = async (RestaurantID, date, slot, partySize, Tab
     let res;
 
     try {
-      res = await fetch('http://localhost:8080/v1/reservations', {
+      res = await fetch('/v1/reservations', {
         headers: {
           Authorization: `Bearer ${Userfront.tokens.accessToken}`,
           'Content-Type': 'application/json',
@@ -39,7 +38,6 @@ export const createReservation = async (RestaurantID, date, slot, partySize, Tab
       }
 
       const data = await res.json();
-      console.log(data);
 
       return data;
 

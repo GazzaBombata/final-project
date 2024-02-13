@@ -11,13 +11,11 @@ export const fetchRestaurantForUser = async () => {
   let res;
 
   try {
-    res = await fetch('http://localhost:8080/v1/user/restaurant', {
+    res = await fetch('/v1/user/restaurant', {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
       },
     });
-
-    console.log(res);
 
     if (!res.ok) {
       throw new Error('Network response was not ok');

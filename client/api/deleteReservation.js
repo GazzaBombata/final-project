@@ -8,7 +8,7 @@ export const deleteReservation = async (reservationID) => {
 
   try {
     
-    res = await fetch(`http://localhost:8080/v1/reservations/${reservationID}`, {
+    res = await fetch(`/v1/reservations/${reservationID}`, {
       headers: {
         Authorization: `Bearer ${Userfront.tokens.accessToken}`,
       },

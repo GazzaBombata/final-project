@@ -1,20 +1,16 @@
 import React from "react";
 import Userfront, { LoginForm } from "@userfront/toolkit/react";
-import LogoutButton from "../components/LogoutButton";
-import resetStates from "../functions-hooks/resetStates.js";
 import { PrimaryButton } from "../components/styles.js";
 import { useNavigate } from "react-router-dom";
 import { VerticalContainer, CenteredSection } from "../components/styles.js";
 import { useSelector } from "react-redux";
+import Head from "../components/Head.jsx";
 
 Userfront.init("wn9vz89b");
 
 function App() {
 
   const redirectUrl = useSelector(state => state.redirect.redirectUrl);
-  console.log(redirectUrl);
-
-  console.log(Userfront.tokens.accessToken);
 
   const navigate = useNavigate();
 
@@ -24,6 +20,7 @@ function App() {
 
   return (
     <>
+      <Head title="Tablebooks - login page" description="Login page for Tblebooks users" siteContent="Tablebooks, restaurant reservations made simple"/>
       <LoginForm />
       <CenteredSection>
         <VerticalContainer $maxWidth="200px" $align="center">
