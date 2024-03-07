@@ -2,6 +2,7 @@
 
 This project is a web application built with React and Node.JS/Express. It uses a variety of libraries and tools such as Redux, Userfront, Axios, Bcrypt, CORS, date-fns, dotenv, Grommet, JOSE, Multer, MySQL2, polished, React Calendar, React Helmet, React Query, React Redux, React Router DOM, Redux Persist, Sequelize, Styled Components, and UUID. The live website is hosted on GCP (App Engine).
 
+It is a showcase project of a FullStack webapp, simulating a basic SaaS that allws restaurant owners to register on the platform and receive table regirsavations from thei customers.
 ## Installation
 
 Before starting, make sure you have Node.js and npm installed on your machine.
