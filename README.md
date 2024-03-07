@@ -1,4 +1,4 @@
-# final-project
+# Tablebooks - Start2Impact finalproject
 
 This project is a web application built with React and Node.JS/Express. It uses a variety of libraries and tools such as Redux, Userfront, Axios, Bcrypt, CORS, date-fns, dotenv, Grommet, JOSE, Multer, MySQL2, polished, React Calendar, React Helmet, React Query, React Redux, React Router DOM, Redux Persist, Sequelize, Styled Components, and UUID.
 
