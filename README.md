@@ -1,6 +1,6 @@
 # Tablebooks - Start2Impact finalproject
 
-This project is a web application built with React and Node.JS/Express. It uses a variety of libraries and tools such as Redux, Userfront, Axios, Bcrypt, CORS, date-fns, dotenv, Grommet, JOSE, Multer, MySQL2, polished, React Calendar, React Helmet, React Query, React Redux, React Router DOM, Redux Persist, Sequelize, Styled Components, and UUID.
+This project is a web application built with React and Node.JS/Express. It uses a variety of libraries and tools such as Redux, Userfront, Axios, Bcrypt, CORS, date-fns, dotenv, Grommet, JOSE, Multer, MySQL2, polished, React Calendar, React Helmet, React Query, React Redux, React Router DOM, Redux Persist, Sequelize, Styled Components, and UUID. The live website is hosted on GCP (App Engine).
 
 ## Installation
 
@@ -8,7 +8,7 @@ Before starting, make sure you have Node.js and npm installed on your machine.
 
 1. Clone this repository:
 ```bash
-git clone (https://github.com/GazzaBombata/final-project)
+git clone (https://github.com/GazzaBombata/tablebooks)
 ```
 
 2. Navigate into the project directory:
